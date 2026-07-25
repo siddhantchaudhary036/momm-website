@@ -15,6 +15,52 @@ export const theme = {
   text: "#FFFFFF",
 
   /**
+   * Balloon and panel fill — warm newsprint. Text *inside* a balloon is
+   * ink on paper, not white; which quietly fixes the contrast problem
+   * globals.css has been patching with text-shadows. White-on-pastel is
+   * only used for the full-bleed splash lines that sit outside a frame.
+   */
+  paper: "#FBF6E9",
+
+  /**
+   * The door: painted enamel on a mid-century fridge.
+   *
+   * Light, because the avatars are high-key flat vector with white
+   * die-cut outlines — high-key art on a dark ground always reads as a
+   * sticker pasted into a void, which is exactly what the matte black
+   * version did to them. Cool and desaturated, because the characters are
+   * warm coral and need to stay the warmest thing in the room.
+   *
+   * Matte stays a rule: nothing in this world gets a specular highlight.
+   * Screens and glass are the only things allowed to shine, which is the
+   * point — they're what doesn't belong here.
+   */
+  door: "#C4D2D8",
+  /** type and marks sitting directly on the door */
+  onDoor: "#2B2118",
+
+  /** outline weight — the phone body, and anything else that needs an edge */
+  stroke: 2.5,
+
+  /** ballpoint — momm's hand, kept distinct from the structural ink */
+  pen: "#25306B",
+
+  /**
+   * The fridge-door vocabulary, capped on purpose. Two fasteners and
+   * three papers, enumerated here so nobody adds a fourth: an unbounded
+   * pile of tape, pins, clips and coffee rings is exactly how a
+   * scrapbook layout stops looking made and starts looking cluttered.
+   */
+  fridge: {
+    tape: "#FFF6DC",
+    magnet: "#E8567A",
+    rule: "#2A0E4A1A", //   ruled lines on notepaper
+    grid: "#2A0E4A14", //   graph paper
+    /** max tilt in degrees — larger reads as amateur, not handmade */
+    tilt: 2.5,
+  },
+
+  /**
    * The background is light pastel, so every non-text graphic
    * (bars, dots, grids, tracks, form fields, chrome) is drawn in
    * this deep "ink" instead of white — otherwise it vanishes.

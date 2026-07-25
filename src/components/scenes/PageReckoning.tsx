@@ -1,0 +1,243 @@
+"use client";
+
+import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
+import { useRef, useState } from "react";
+import Avatar from "../Avatar";
+import Standing from "../Standing";
+import WordReveal from "../WordReveal";
+import Annotation from "../ink/Annotation";
+import ClockDial from "../ink/ClockDial";
+import { PEN } from "../ink/Ink";
+import LifeSheet from "../ink/LifeSheet";
+import TallyField from "../ink/TallyField";
+
+/**
+ * PAGE 02 — the reckoning, on the paper we pushed into.
+ *
+ * The previous version had the right instinct and the wrong scale. It
+ * knew the four consecutive scroll-scrubs had to become one canvas that
+ * transforms, and it knew a donut was a quarterly report — but it then
+ * put the result inside a 42rem note at `scale-90`, which is about seven
+ * per cent of a laptop screen, under a sentence, as an illustration of
+ * the sentence. The data was the argument and it was being rendered as
+ * decoration for the copy.
+ *
+ * Three beats now, each the whole screen, each a different form, all of
+ * them drawn rather than filled:
+ *
+ *   144   a tally. One stroke per pickup — not a mark standing for a
+ *         pickup, the actual count, written the way a person writes a
+ *         count they've stopped enjoying keeping.
+ *   5:16  a dial, against your waking sixteen rather than a full day,
+ *         because counting the hours you were asleep would be padding.
+ *   32    the life sheet, ruled by hand, with a third of it scratched out.
+ *
+ * The copy has been demoted to caption, which is the correct rank for it
+ * once the chart is big enough to make the point on its own — and the
+ * marginalia carries her voice instead, because a number somebody has
+ * scrawled next to is a number somebody has *reacted* to.
+ */
+
+const BEATS: [number, number][] = [
+  [0.0, 0.38],
+  [0.38, 0.66],
+  [0.66, 1.0],
+];
+
+const LINES = [
+  "You picked it up 144 times today.",
+  "Five hours, sixteen minutes. Every day.",
+  "Keep going, and that's 32 years of your one life.",
+];
+
+const N_PICKUPS = 144;
+const YEARS_LOST = 32;
+
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+const span = (p: number, a: number, b: number) => clamp01((p - a) / (b - a));
+
+export default function PageReckoning() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end end"],
+  });
+
+  const [beat, setBeat] = useState(0);
+  const [count, setCount] = useState(0);
+  const [dial, setDial] = useState(0);
+  const [rule, setRule] = useState(0);
+  const [lost, setLost] = useState(0);
+  const beatRef = useRef(0);
+
+  useMotionValueEvent(scrollYProgress, "change", (p) => {
+    const b = p < BEATS[0][1] ? 0 : p < BEATS[1][1] ? 1 : 2;
+    beatRef.current = b;
+    setBeat(b);
+    setCount(Math.round(span(p, 0.03, 0.3) * N_PICKUPS));
+    setDial(span(p, 0.4, 0.63));
+    setRule(span(p, 0.67, 0.75));
+    setLost(Math.round(span(p, 0.77, 0.96) * YEARS_LOST));
+  });
+
+  /** the caption lights across its own beat's slice of the runway */
+  const lineProgress = useTransform(scrollYProgress, (p) => {
+    const [a, b] = BEATS[beatRef.current];
+    return clamp01((p - a) / (b - a) / 0.7);
+  });
+
+  return (
+    <section ref={ref} className="relative h-[420vh]">
+      <div className="sticky top-0 h-screen overflow-hidden">
+        {/* the caption, top-left, in her hand — the copy is no longer the
+            thing being illustrated, so it sits in the corner like a note
+            written above the working-out */}
+        <div className="absolute left-[6vw] right-[6vw] top-[6vh] z-20 md:left-[7vw] md:top-[8vh] md:max-w-[34rem]">
+          <motion.p
+            key={beat}
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.32 }}
+            className="font-hand text-[1.6rem] leading-tight md:text-[2.4rem]"
+            style={{ color: PEN.ink }}
+          >
+            <WordReveal text={LINES[beat]} progress={lineProgress} />
+          </motion.p>
+        </div>
+
+        <Beat on={beat === 0}>
+          <Tally count={count} />
+        </Beat>
+        <Beat on={beat === 1}>
+          <Dial p={dial} />
+        </Beat>
+        <Beat on={beat === 2}>
+          <Life rule={rule} lost={lost} />
+        </Beat>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Beats cross-fade rather than mount and unmount. Each chart builds a few
+ * hundred seeded paths on first render, and rebuilding those every time
+ * the reader scrubs back over a boundary is the one thing on this page
+ * that would actually be felt.
+ */
+function Beat({ on, children }: { on: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      className="absolute inset-0"
+      style={{
+        opacity: on ? 1 : 0,
+        visibility: on ? "visible" : "hidden",
+        transition: "opacity 340ms ease-out, visibility 0s linear " + (on ? "0s" : "340ms"),
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ 144 */
+
+function Tally({ count }: { count: number }) {
+  return (
+    <div className="relative flex h-full w-full items-center justify-center gap-[4vw] px-[6vw] pt-[7vh]">
+      {/* the count on the left, the marks on the right — the number is
+          what the section is about and the tally is the evidence for it,
+          so the number gets the reading position */}
+      <div className="flex shrink-0 flex-col">
+        <span className="t-mega font-header tabular-nums" style={{ color: PEN.ink }}>
+          {count}
+        </span>
+        <span
+          className="mt-1 font-sub text-xl italic md:text-2xl"
+          style={{ color: PEN.ink, opacity: 0.6 }}
+        >
+          times, today
+        </span>
+        <Annotation dir="down-right" seed="every-six-minutes" className="mt-6 hidden lg:flex">
+          once every 6½ minutes
+        </Annotation>
+      </div>
+
+      <TallyField count={count} className="h-[62vh] w-auto max-w-[52vw] shrink" />
+    </div>
+  );
+}
+
+/* ----------------------------------------------------------------- 5:16 */
+
+function Dial({ p }: { p: number }) {
+  return (
+    <div className="relative flex h-full w-full items-center justify-center gap-[3vw] px-[6vw] pt-[7vh]">
+      <ClockDial p={p} className="h-[52vh] w-auto shrink-0 md:h-[68vh]" />
+
+      <div className="flex shrink-0 flex-col">
+        {/*
+          Units set small rather than merely faded. The first pass stacked
+          "5h" over "16m" at full display size with the h and the m turned
+          down in opacity, which read as two mis-set lines with a
+          rendering fault in them — a grey letter the same size as a black
+          one looks broken, not subordinate. Scale is what makes something
+          a unit; opacity on its own just makes it look wrong.
+        */}
+        <span className="t-mega font-header tabular-nums" style={{ color: PEN.ink }}>
+          5<Unit>h</Unit> 16<Unit>m</Unit>
+        </span>
+        <span
+          className="mt-2 font-sub text-xl italic md:text-2xl"
+          style={{ color: PEN.ink, opacity: 0.6 }}
+        >
+          of your sixteen waking hours
+        </span>
+        <Annotation dir="up-left" seed="waking-third" className="mt-6 hidden lg:flex">
+          that&rsquo;s one waking hour in three
+        </Annotation>
+      </div>
+    </div>
+  );
+}
+
+function Unit({ children }: { children: React.ReactNode }) {
+  return (
+    <span style={{ fontSize: "0.4em", opacity: 0.5 }} className="font-sub italic">
+      {children}
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------- 32 */
+
+function Life({ rule, lost }: { rule: number; lost: number }) {
+  return (
+    <div className="relative flex h-full w-full items-center justify-center gap-[3vw] px-[5vw] pt-[6vh]">
+      <div className="hidden shrink-0 flex-col md:flex">
+        <span className="t-mega font-header tabular-nums" style={{ color: PEN.loss }}>
+          {lost}
+        </span>
+        <span
+          className="mt-1 font-sub text-xl italic md:text-2xl"
+          style={{ color: PEN.ink, opacity: 0.6 }}
+        >
+          years of it, gone
+        </span>
+        <Annotation dir="down-right" seed="one-square-one-year" className="mt-6 hidden lg:flex">
+          one square, one year
+        </Annotation>
+      </div>
+
+      <LifeSheet rule={rule} filled={lost} className="h-[64vh] w-auto max-w-[52vw] shrink" />
+
+      {/* he's been sitting in this grid the whole time — and she is
+          deliberately still absent, which is what gives her return on the
+          next page somewhere to land */}
+      <Standing className="bottom-[4vh] right-[3vw] hidden xl:block">
+        <Avatar name="kid-sad" drained bob={false} className="h-44" sizes="18vw" />
+      </Standing>
+    </div>
+  );
+}
+

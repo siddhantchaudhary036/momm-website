@@ -3,34 +3,88 @@
 @theme inline {
   --font-header: var(--font-bitter), serif;
   --font-sub: var(--font-instrument), serif;
+  --font-hand: var(--font-caveat), cursive;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {
   overflow-x: clip;
-  color: #fff;
+  color: #2b2118;
 }
 
-/* white text on a light pastel gradient is low-contrast — a whisper of
-   ink shadow gives every headline/caption a readable edge without
-   changing the look. Marks (bars/dots/etc.) are drawn in ink instead. */
-h1,
-h2,
-h3,
-p,
-button,
-input,
-label {
-  text-shadow:
-    0 1px 2px rgba(30, 8, 55, 0.28),
-    0 2px 22px rgba(30, 8, 55, 0.16);
+/* ---------------------------------------------------------------
+   One type scale. Sizes used to be picked per scene, which is most
+   of what makes a page feel assembled rather than designed. Six
+   steps on a 1.25 ratio, fluid between a phone and a desktop, and
+   nothing outside this list.
+
+   The scale used to stop at 5rem, and that ceiling was doing more
+   damage than any single bad choice on the page: with nothing above
+   it, every headline, note, chart and card landed inside the same
+   narrow band of sizes, and a composition where everything is
+   medium reads as a template no matter how good the parts are.
+   `t-mega` exists to be used two or three times in the whole site,
+   on the numbers the argument actually turns on — it is a viewport
+   fraction rather than a rem step because at this size the number
+   is behaving as a piece of art direction, not as text.
+   --------------------------------------------------------------- */
+.t-mega {
+  font-size: clamp(5.5rem, 2rem + 19vw, 17rem);
+  line-height: 0.82;
+  letter-spacing: -0.045em;
+  font-weight: 900;
 }
-input {
-  text-shadow: none;
+.t-display {
+  font-size: clamp(2.6rem, 1.6rem + 4.4vw, 5rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
 }
+.t-h1 {
+  font-size: clamp(2rem, 1.35rem + 2.9vw, 3.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+}
+.t-h2 {
+  font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2.4rem);
+  line-height: 1.16;
+  letter-spacing: -0.01em;
+}
+.t-lead {
+  font-size: clamp(1.15rem, 1rem + 0.7vw, 1.6rem);
+  line-height: 1.4;
+}
+.t-body {
+  font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.1rem);
+  line-height: 1.55;
+}
+.t-caption {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+}
+
+/* handwriting has to sit on the ruled lines, so its steps are locked
+   to the rule pitch in fridge/paper.ts rather than to the scale above */
+.t-hand-lg {
+  font-size: clamp(1.9rem, 1.3rem + 2.4vw, 3rem);
+  line-height: 34px;
+}
+.t-hand {
+  font-size: clamp(1.35rem, 1.1rem + 1vw, 1.85rem);
+  line-height: 34px;
+}
+
+/* section rhythm — one vertical unit, not a per-scene guess */
+.section-y {
+  padding-block: clamp(3.5rem, 2rem + 7vw, 7.5rem);
+}
+
+/* Type is dark on a light enamel door now, so the old white-on-pastel
+   shadow hack is gone — it only ever existed to rescue white text from a
+   background it couldn't sit on. Contrast is handled by the palette. */
 
 ::selection {
   background: rgba(255, 255, 255, 0.25);
