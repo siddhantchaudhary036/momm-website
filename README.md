@@ -35,7 +35,7 @@ All colors live in **`src/theme.ts`** — swap `gradient.from` (top) and
 
 Typed hero → scroll-fill data reckoning (pickups · hours · 32 lost years ·
 social donut) → "Your mom was right." → she notices / she sets the limits →
-+6 years payoff → waitlist.
++6 years payoff → the ask, on black, beside a phone with Instagram shut.
 
 - **Fonts:** Bitter (headers / typed mom-lines) · Instrument Serif (sign-offs, captions)
 - **Motion:** framer-motion (scroll-scrubbed via `useScroll` + `useTransform`)

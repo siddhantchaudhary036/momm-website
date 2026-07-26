@@ -6,19 +6,19 @@ import { inkLine } from "@/lib/ink";
 import { theme } from "@/theme";
 
 /**
- * A stretch of the site that happens *on* the paper rather than on the door.
+ * One act of the site, on her paper.
  *
- * The site now has an inside and an outside, and this is the inside. The
- * door is the room — enamel, daylight, the product, other people. Paper is
- * her hand: her arithmetic, her margin notes, the drawing she kept. You
- * get in by the hero pushing through the note until the sheet is all
- * there is, and you get out by seeing the sheet's edge again.
+ * You go through the door exactly once — the hero pushes through the note
+ * until the sheet is everything — and after that this is the only surface
+ * there is. So an act boundary is no longer a change of material, it's the
+ * next sheet lying on the last one: a torn edge, a shadow under it, tape
+ * across the top.
  *
- * That last part is why the edge is drawn rather than faded. A background
- * that cross-dissolves from cream to blue-grey is two colours; a sheet of
- * paper whose bottom edge you can see, with the door showing under it, is
- * an object — and the object is the only reason any of this reads as one
- * place instead of a sequence of coloured bands.
+ * That's why the edge is drawn rather than faded. A background that
+ * cross-dissolves between two creams is a gradient; a sheet whose torn edge
+ * you can see, casting a shadow onto the sheet beneath, is an object — and
+ * the object is the only reason a stack of these reads as one fridge door
+ * instead of a sequence of coloured bands.
  *
  * There are no ruled lines here on purpose. The hero's note has them and
  * they fade out as the zoom pushes in, because at this distance you are
@@ -30,7 +30,7 @@ const EDGE_W = 1200;
 const EDGE_H = 26;
 
 /**
- * The cut edge of the sheet, and the door showing beneath it.
+ * The torn edge of the sheet, and whatever it's lying on showing beneath.
  *
  * Deliberately no `useMemo` and no `"use client"`: this whole component
  * is a server component wrapping client children, which is the right way
@@ -77,15 +77,18 @@ function Edge({ side, seed }: { side: "top" | "bottom"; seed: string }) {
 export default function PaperAct({
   children,
   className = "",
-  /** show the sheet's cut edge, and the door under it */
+  /**
+   * Which torn edges of this sheet are visible. `"top"` is the usual one —
+   * it's the seam where this act begins, laid over the act before it.
+   */
   edges = "none",
-  /** a sheet with both edges visible is an object, so it needs holding up */
+  /** a sheet whose edge you can see is an object, so it needs holding up */
   fasten = false,
   seed = "sheet",
 }: {
   children: ReactNode;
   className?: string;
-  edges?: "none" | "bottom" | "both";
+  edges?: "none" | "top" | "bottom" | "both";
   fasten?: boolean;
   seed?: string;
 }) {
@@ -121,8 +124,12 @@ export default function PaperAct({
         style={{ background: PAPER_LIGHT, backgroundAttachment: "fixed" }}
       />
 
-      {edges === "both" && <Edge side="top" seed={`${seed}-top`} />}
-      {edges !== "none" && <Edge side="bottom" seed={`${seed}-bottom`} />}
+      {(edges === "top" || edges === "both") && (
+        <Edge side="top" seed={`${seed}-top`} />
+      )}
+      {(edges === "bottom" || edges === "both") && (
+        <Edge side="bottom" seed={`${seed}-bottom`} />
+      )}
 
       {fasten && (
         <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-20">

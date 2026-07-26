@@ -65,17 +65,6 @@ export default function Scene00Hero() {
   /** how far through we are to being *on* the paper rather than at it */
   const land = useTransform(zoom, [0.25, 0.7], [0, 1]);
   /**
-   * Function form, not the `[0, 0.12] -> [1, 0]` range form.
-   *
-   * The range form did not update here: measured against the live page,
-   * this stayed pinned at 1 through the entire push-in while every other
-   * derived value on the same `scrollYProgress` advanced correctly, so
-   * the chevron sat on top of the fully-zoomed sheet. Whatever the cause,
-   * the explicit function is unambiguous and verified — don't "simplify"
-   * it back to a range without re-checking the value at scroll 400.
-   */
-  const hint = useTransform(scrollYProgress, (p) => Math.max(0, 1 - p / 0.12));
-  /**
    * The note is vertically centred but momm hangs below it, so the group
    * reads bottom-heavy with a screen of dead air above. Lifting the sheet
    * optically centres the pair — and it has to come back to zero before
@@ -206,20 +195,6 @@ export default function Scene00Hero() {
                 )}
               </AnimatePresence>
             </div>
-          </motion.div>
-
-          <motion.div
-            style={{ opacity: hint, color: theme.onDoor }}
-            className="absolute bottom-8 z-30 flex flex-col items-center gap-1 opacity-70"
-          >
-            <motion.span
-              animate={{ y: [0, 8, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-              className="text-2xl"
-              aria-hidden
-            >
-              ⌄
-            </motion.span>
           </motion.div>
         </div>
       </div>

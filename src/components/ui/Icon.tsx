@@ -12,15 +12,42 @@
  */
 
 export type IconName =
+  | "home"
+  | "search"
+  | "reels"
+  | "shop"
+  | "person"
   | "camera"
   | "music"
   | "play"
   | "flame"
   | "eye"
+  | "lock"
   | "check"
   | "heart";
 
 const PATHS: Record<IconName, React.ReactNode> = {
+  home: <path d="M3 10.5 12 3l9 7.5M5.5 9.5V20h13V9.5" />,
+  search: (
+    <>
+      <circle cx="11" cy="11" r="6.5" />
+      <path d="m16 16 4.5 4.5" />
+    </>
+  ),
+  reels: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <path d="M8.5 3.5 11 8M14 3.5 16.5 8M3.5 8h17" />
+      <path d="m10.5 12.5 4 2.2-4 2.2z" />
+    </>
+  ),
+  shop: <path d="M4 8h16l-1.2 12H5.2zM8.5 8V6a3.5 3.5 0 0 1 7 0v2" />,
+  person: (
+    <>
+      <circle cx="12" cy="8" r="3.75" />
+      <path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6" />
+    </>
+  ),
   camera: (
     <>
       <rect x="3" y="3" width="18" height="18" rx="5" />
@@ -48,6 +75,12 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M2.5 12S6 6.5 12 6.5 21.5 12 21.5 12 18 17.5 12 17.5 2.5 12 2.5 12Z" />
       <circle cx="12" cy="12" r="2.8" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect x="4.5" y="10" width="15" height="10.5" rx="3" />
+      <path d="M8.25 10V7.5a3.75 3.75 0 0 1 7.5 0V10" />
     </>
   ),
   check: <path d="m4.5 12.5 5 5 10-11" />,

@@ -2,53 +2,61 @@ import PaperAct from "@/components/paper/PaperAct";
 import PageMeetMomm from "@/components/scenes/PageMeetMomm";
 import PagePayoff from "@/components/scenes/PagePayoff";
 import PageReckoning from "@/components/scenes/PageReckoning";
-import PageTurn from "@/components/scenes/PageTurn";
 import PaperOpen from "@/components/scenes/PaperOpen";
 import Scene00Hero from "@/components/scenes/Scene00Hero";
 import Scene07Waitlist from "@/components/scenes/Scene07Waitlist";
 import Scene08Footer from "@/components/scenes/Scene08Footer";
+import SkipToWaitlist from "@/components/ui/SkipToWaitlist";
 
 /**
- * The site has an inside and an outside.
+ * You go through the door once, and after that it's all her paper.
  *
  *   DOOR    the hero — one note taped to the fridge, in a room
  *     ↓     the push-in: the sheet grows until it is everything
- *   PAPER   her hand — the reckoning, and the turn
- *     ↓     the sheet's bottom edge, and the door under it again
- *   DOOR    the product — she notices, she sets the rules
- *   PAPER   the drawing she put up, taped at both corners
- *   DOOR    the ask, and the bottom of the door
+ *   PAPER   her arithmetic — the reckoning
+ *   PAPER   the product — she notices, she sets the rules
+ *   PAPER   the drawing she put up
+ *   NIGHT   the ask — lights down to her note and a shut phone
+ *   PAPER   the sign-off
  *
- * That alternation is the structure the previous running order didn't
- * have. Seven sections all on one surface is a list; the same seven with
- * two changes of material is an argument that goes somewhere and comes
- * back, and it means the three moments worth the reader's whole screen —
- * the numbers, the turn, the drawing — are separated by something other
- * than more scrolling.
+ * Only the first screen is enamel. Everything after it happens on the same
+ * cream, and the acts are separated the way sheets on a fridge actually are:
+ * a torn edge with tape over it, one sheet lying on the next. That reads
+ * calmer than the door/paper alternation this used to make — the reader stops
+ * being moved between two rooms and just keeps reading her handwriting — and
+ * the seams still do the work the changes of material were there for.
  *
- * Pacing still alternates deliberately inside each act. Static sections
- * read fast and cheap; pinned scrubs are expensive and reserved for the
- * beats that earn them.
+ * Pacing alternates deliberately. Static sections read fast and cheap;
+ * pinned scrubs are expensive and reserved for the beats that earn them.
  */
 export default function Home() {
   return (
     <main className="relative">
       <Scene00Hero />
 
-      <PaperAct edges="bottom" seed="reckoning">
+      {/* no top edge: the hero's push-in has already put you on this sheet */}
+      <PaperAct seed="reckoning">
         <PaperOpen />
         <PageReckoning />
-        <PageTurn />
       </PaperAct>
 
-      <PageMeetMomm />
+      <PaperAct edges="top" fasten seed="product">
+        <PageMeetMomm />
+      </PaperAct>
 
-      <PaperAct edges="both" fasten seed="drawing" className="my-[12vh]">
+      {/* both edges: this is the last sheet, so its torn bottom is where the
+          paper runs out and the dark underneath it shows */}
+      <PaperAct edges="both" fasten seed="drawing">
         <PagePayoff />
       </PaperAct>
 
       <Scene07Waitlist />
-      <Scene08Footer />
+
+      <PaperAct edges="top" fasten seed="signoff">
+        <Scene08Footer />
+      </PaperAct>
+
+      <SkipToWaitlist />
     </main>
   );
 }

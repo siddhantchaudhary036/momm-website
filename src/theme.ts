@@ -69,6 +69,21 @@ export const theme = {
    */
   ink: "#2A0E4A",
 
+  /**
+   * The one dark surface: the ask, and the phone screen inside it.
+   *
+   * Not pure #000 — it carries a trace of the ink's violet, so the black
+   * belongs to this palette instead of reading as an absence of one. Lift it
+   * with a low-alpha white radial rather than a second colour, the way
+   * `Kitchen` lights the door.
+   *
+   * Use sparingly. Everything else on this site is light for a reason: the
+   * avatars are high-key flat vector with white die-cut outlines, and on a
+   * dark ground they read as stickers pasted into a void unless something
+   * puts them in the room — a pool of light under them, at minimum.
+   */
+  night: "#0B0710",
+
   // accents for the reckoning — deepened so they pop on pastel
   danger: "#FF2D55", // the red that floods the life-grid
   heal: "#12B981", //   the green that gives the years back
