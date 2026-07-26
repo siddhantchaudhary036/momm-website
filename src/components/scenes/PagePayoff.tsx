@@ -39,8 +39,15 @@ export default function PagePayoff() {
 
   return (
     <section ref={ref} className="relative h-[200vh]">
-      <div className="sticky top-0 flex h-screen items-center gap-[3vw] overflow-hidden px-[6vw]">
-        <div className="flex shrink-0 flex-col">
+      {/*
+        Same fix as the reckoning's three beats, which share this exact
+        shape: a mega-number block plus an h-vh/w-auto chart in a row that
+        never wrapped. On a phone that produces a chart as wide as it is
+        tall, which is wider than the screen — stack instead, and size the
+        chart off viewport width there rather than height.
+      */}
+      <div className="sticky top-0 flex h-screen flex-col items-center justify-center gap-6 overflow-hidden px-6 md:flex-row md:gap-[3vw] md:px-[6vw]">
+        <div className="flex shrink-0 flex-col text-center md:text-left">
           <span
             className="t-mega font-header tabular-nums"
             style={{ color: PEN.gain }}
@@ -68,7 +75,7 @@ export default function PagePayoff() {
           filled={32}
           healed={healed}
           canHeal
-          className="h-[64vh] w-auto max-w-[52vw] shrink"
+          className="h-auto w-[76vw] max-w-[22rem] shrink md:h-[64vh] md:w-auto md:max-w-[52vw]"
         />
 
         <Standing className="bottom-[4vh] right-[3vw] hidden xl:block">

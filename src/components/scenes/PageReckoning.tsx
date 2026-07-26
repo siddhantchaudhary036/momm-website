@@ -144,11 +144,12 @@ function Beat({ on, children }: { on: boolean; children: React.ReactNode }) {
 
 function Tally({ count }: { count: number }) {
   return (
-    <div className="relative flex h-full w-full items-center justify-center gap-[4vw] px-[6vw] pt-[7vh]">
+    <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 px-6 pt-[8vh] md:flex-row md:gap-[4vw] md:px-[6vw] md:pt-[7vh]">
       {/* the count on the left, the marks on the right — the number is
           what the section is about and the tally is the evidence for it,
-          so the number gets the reading position */}
-      <div className="flex shrink-0 flex-col">
+          so the number gets the reading position. Stacked on mobile, it
+          keeps that position by simply coming first. */}
+      <div className="flex shrink-0 flex-col text-center md:text-left">
         <span className="t-mega font-header tabular-nums" style={{ color: PEN.ink }}>
           {count}
         </span>
@@ -163,7 +164,17 @@ function Tally({ count }: { count: number }) {
         </Annotation>
       </div>
 
-      <TallyField count={count} className="h-[62vh] w-auto max-w-[52vw] shrink" />
+      {/*
+        Height-driven sizing (h-vh, w-auto) is right once the chart has a row
+        to itself, but on a phone this square-ish field would rather be
+        exactly as wide as the screen than as tall as the screen — sized off
+        vh there, its auto width blows straight through the viewport, which
+        is the clipped-donut bug this whole file was rewritten to fix.
+      */}
+      <TallyField
+        count={count}
+        className="h-auto w-[76vw] max-w-[22rem] shrink md:h-[62vh] md:w-auto md:max-w-[52vw]"
+      />
     </div>
   );
 }
@@ -172,10 +183,16 @@ function Tally({ count }: { count: number }) {
 
 function Dial({ p }: { p: number }) {
   return (
-    <div className="relative flex h-full w-full items-center justify-center gap-[3vw] px-[6vw] pt-[7vh]">
-      <ClockDial p={p} className="h-[52vh] w-auto shrink-0 md:h-[68vh]" />
+    <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 px-6 pt-[8vh] md:flex-row md:gap-[3vw] md:px-[6vw] md:pt-[7vh]">
+      {/* width-capped on mobile for the same reason as the tally field —
+          the dial is a 1:1 square, so an h-vh reading on a tall narrow
+          screen produces an equally wide circle that runs off the sides */}
+      <ClockDial
+        p={p}
+        className="h-auto w-[64vw] max-w-[19rem] shrink-0 md:h-[52vh] md:w-auto md:max-w-none lg:h-[68vh]"
+      />
 
-      <div className="flex shrink-0 flex-col">
+      <div className="flex shrink-0 flex-col text-center md:text-left">
         {/*
           Units set small rather than merely faded. The first pass stacked
           "5h" over "16m" at full display size with the h and the m turned
@@ -213,8 +230,12 @@ function Unit({ children }: { children: React.ReactNode }) {
 
 function Life({ rule, lost }: { rule: number; lost: number }) {
   return (
-    <div className="relative flex h-full w-full items-center justify-center gap-[3vw] px-[5vw] pt-[6vh]">
-      <div className="hidden shrink-0 flex-col md:flex">
+    <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 px-6 pt-[8vh] md:flex-row md:gap-[3vw] md:px-[5vw] md:pt-[6vh]">
+      {/* used to be `hidden md:flex` — hiding the number was covering for
+          the same row-overflow bug as the other two beats, at the cost of
+          mobile readers never seeing "32" at all. Stacking fixes the
+          overflow properly, so the number can stay. */}
+      <div className="flex shrink-0 flex-col text-center md:text-left">
         <span className="t-mega font-header tabular-nums" style={{ color: PEN.loss }}>
           {lost}
         </span>
@@ -229,7 +250,11 @@ function Life({ rule, lost }: { rule: number; lost: number }) {
         </Annotation>
       </div>
 
-      <LifeSheet rule={rule} filled={lost} className="h-[64vh] w-auto max-w-[52vw] shrink" />
+      <LifeSheet
+        rule={rule}
+        filled={lost}
+        className="h-auto w-[76vw] max-w-[22rem] shrink md:h-[64vh] md:w-auto md:max-w-[52vw]"
+      />
 
       {/* he's been sitting in this grid the whole time — and she is
           deliberately still absent, which is what gives her return on the
