@@ -23,11 +23,11 @@ import { theme } from "@/theme";
  * and surveillance is what every other app in this category already sells.
  * She hugs you instead.
  *
- * The one dark section on the site. Lights go down, the door goes away, and
- * the last two things left are what she does (a phone with Instagram shut) and
- * what she wants (your address). The cream note and the lit phone screen are
- * the only bright objects in frame, which is the whole reason to put the ask
- * on black — nothing else is competing for the eye by the time you get here.
+ * On the same paper as every other act now — `page.tsx` wraps this in
+ * `PaperAct` for the fibre, the light and the taped seam, same as the
+ * sections either side. `BlockedPhone` stays dark inside its own frame
+ * regardless: a phone screenshot with a dark UI sitting on a light page is
+ * completely ordinary, the same way it would be on paper under glass.
  *
  * Signups go to `/api/waitlist`, which proxies to Convex server-side.
  */
@@ -73,24 +73,9 @@ export default function Scene07Waitlist() {
   return (
     <section
       id={WAITLIST_ID}
-      className="relative flex min-h-screen flex-col items-center justify-center gap-14 overflow-hidden px-6 py-20 xl:flex-row xl:gap-20"
-      style={{ backgroundColor: theme.night }}
+      className="flex min-h-screen flex-col items-center justify-center gap-14 px-6 py-20 xl:flex-row xl:gap-20"
     >
-      {/*
-        One light, same as every other section — it just has almost nothing to
-        fall on here. Lifting the black with a low-alpha white keeps it in the
-        palette instead of introducing a second dark colour.
-      */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(75% 55% at 50% 42%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 72%)",
-        }}
-      />
-
-      <div className="relative flex items-end gap-3 md:gap-10">
+      <div className="flex items-end gap-3 md:gap-10">
         <Note
           seed="make-momm-proud"
           paper="lined"
@@ -169,36 +154,20 @@ export default function Scene07Waitlist() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 260, damping: 16 }}
-            className="relative shrink-0"
+            className="shrink-0"
           >
-            {/*
-              She is high-key flat vector with a white die-cut outline, and on a
-              dark ground that reads as a sticker pasted into a void unless
-              something puts her in the room. A pool of light at her feet is the
-              cheapest floor there is.
-            */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute bottom-1 left-1/2 z-0 h-14 w-[125%] -translate-x-1/2 rounded-[50%]"
-              style={{
-                background:
-                  "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0) 70%)",
-              }}
+            <Avatar
+              name={joined ? "momm-kid-hugging" : "momm-encouraging"}
+              bob={!joined}
+              className="h-44 sm:h-52 md:h-72"
+              sizes="(max-width: 768px) 40vw, 26vw"
             />
-            <div className="relative z-10">
-              <Avatar
-                name={joined ? "momm-kid-hugging" : "momm-encouraging"}
-                bob={!joined}
-                className="h-44 sm:h-52 md:h-72"
-                sizes="(max-width: 768px) 40vw, 26vw"
-              />
-            </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* what she did about it, at real size */}
-      <BlockedPhone className="relative shrink-0" />
+      <BlockedPhone className="shrink-0" />
     </section>
   );
 }

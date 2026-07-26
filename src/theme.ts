@@ -22,21 +22,7 @@ export const theme = {
    */
   paper: "#FBF6E9",
 
-  /**
-   * The door: painted enamel on a mid-century fridge.
-   *
-   * Light, because the avatars are high-key flat vector with white
-   * die-cut outlines — high-key art on a dark ground always reads as a
-   * sticker pasted into a void, which is exactly what the matte black
-   * version did to them. Cool and desaturated, because the characters are
-   * warm coral and need to stay the warmest thing in the room.
-   *
-   * Matte stays a rule: nothing in this world gets a specular highlight.
-   * Screens and glass are the only things allowed to shine, which is the
-   * point — they're what doesn't belong here.
-   */
-  door: "#C4D2D8",
-  /** type and marks sitting directly on the door */
+  /** dark text on paper, used where a slightly warmer black than `ink` reads better */
   onDoor: "#2B2118",
 
   /** outline weight — the phone body, and anything else that needs an edge */
@@ -70,17 +56,18 @@ export const theme = {
   ink: "#2A0E4A",
 
   /**
-   * The one dark surface: the ask, and the phone screen inside it.
+   * The one black on the site: the fridge door behind the hero, and the phone
+   * screen in the ask's `BlockedPhone`.
    *
    * Not pure #000 — it carries a trace of the ink's violet, so the black
    * belongs to this palette instead of reading as an absence of one. Lift it
    * with a low-alpha white radial rather than a second colour, the way
-   * `Kitchen` lights the door.
+   * `Kitchen` already lights it.
    *
-   * Use sparingly. Everything else on this site is light for a reason: the
-   * avatars are high-key flat vector with white die-cut outlines, and on a
-   * dark ground they read as stickers pasted into a void unless something
-   * puts them in the room — a pool of light under them, at minimum.
+   * High-key flat-vector avatars with white die-cut outlines read as a
+   * sticker pasted into a void on a dark ground unless something puts them in
+   * the room — momm standing on this in the hero gets a pool of light at her
+   * feet for exactly that reason. Don't place one on `night` without it.
    */
   night: "#0B0710",
 

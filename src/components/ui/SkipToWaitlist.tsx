@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useLenis } from "lenis/react";
 import { MouseEvent, useEffect, useState } from "react";
+import Icon from "./Icon";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { theme } from "@/theme";
 
@@ -78,9 +79,7 @@ export default function SkipToWaitlist() {
             }}
           >
             Skip to the waitlist
-            <span aria-hidden className="text-base leading-none">
-              ⌄
-            </span>
+            <Icon name="chevronDown" size={13} strokeWidth={2.8} />
           </motion.a>
         </motion.div>
       )}

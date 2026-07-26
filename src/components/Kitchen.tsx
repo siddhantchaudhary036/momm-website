@@ -62,7 +62,7 @@ export default function Kitchen() {
 
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10">
-      <div className="absolute inset-0" style={{ backgroundColor: theme.door }} />
+      <div className="absolute inset-0" style={{ backgroundColor: theme.night }} />
 
       {/* the window, off-canvas upper left */}
       <motion.div

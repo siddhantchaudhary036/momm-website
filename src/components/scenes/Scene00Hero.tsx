@@ -168,12 +168,28 @@ export default function Scene00Hero() {
             className="absolute left-1/2 top-1/2 z-20 ml-12 mt-[6.5rem] -translate-x-1/2 md:ml-20 md:mt-[8.5rem]"
           >
             <div className="relative">
+              {/*
+                She's high-key flat vector with a white die-cut outline, and her
+                own cast shadow (Avatar's silhouette trick) is pure black — on
+                the black door behind her that shadow vanishes and she reads as
+                a sticker pasted into a void. A pool of light at her feet is the
+                cheapest floor there is; every other section she stands on is
+                light enough not to need one.
+              */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute bottom-1 left-1/2 z-0 h-10 w-[130%] -translate-x-1/2 rounded-[50%] sm:h-14"
+                style={{
+                  background:
+                    "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 70%)",
+                }}
+              />
               <Avatar
                 name="momm-smirking"
                 priority
                 enter
                 delay={1.1}
-                className="h-44 sm:h-56 md:h-[17rem]"
+                className="relative z-10 h-44 sm:h-56 md:h-[17rem]"
                 sizes="(max-width: 768px) 40vw, 20vw"
               />
               <AnimatePresence>
@@ -215,8 +231,21 @@ function StaticHero({ nudge }: { nudge: boolean }) {
           <p className="mt-3 text-right text-2xl opacity-80 md:text-3xl">— momm</p>
         </div>
       </Note>
-      <div className="mt-8 md:mt-10">
-        <Avatar name="momm-smirking" priority className="h-44 sm:h-56 md:h-[17rem]" sizes="40vw" />
+      <div className="relative mt-8 md:mt-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute bottom-1 left-1/2 z-0 h-10 w-[130%] -translate-x-1/2 rounded-[50%] sm:h-14"
+          style={{
+            background:
+              "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 70%)",
+          }}
+        />
+        <Avatar
+          name="momm-smirking"
+          priority
+          className="relative z-10 h-44 sm:h-56 md:h-[17rem]"
+          sizes="40vw"
+        />
       </div>
     </section>
   );
