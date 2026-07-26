@@ -4,16 +4,16 @@ import Avatar from "../Avatar";
 import Note from "../fridge/Note";
 import WordReveal from "../WordReveal";
 import NotificationStack from "../ui/NotificationStack";
-import { LimitsCard, ReelsLockedCard, StreakCard } from "../ui/cards";
+import { LimitsCard, StreakCard } from "../ui/cards";
 import { theme } from "@/theme";
 
 /**
  * PAGE 04 — meet momm.
  *
- * Was four identical panels each holding a shrunken phone. Now three
+ * Was four identical panels each holding a shrunken phone. Now two
  * moments, each using the technique it's actually strongest in: she
- * arrives as notifications, she blocks you by blocking you (the section
- * after this one), and she structures you with real UI at real size.
+ * arrives as notifications, and she structures you with real UI at real
+ * size.
  *
  * Nothing here is inside a device frame. The interface is the artwork,
  * not a picture of the artwork on a prop.
@@ -53,27 +53,7 @@ export default function PageMeetMomm() {
         </div>
       </div>
 
-      {/* 2 — she seals things shut */}
-      <div className="mx-auto mt-24 flex max-w-5xl flex-col items-center gap-10 md:mt-32 md:flex-row md:justify-center md:gap-20">
-        <ReelsLockedCard />
-        <div className="md:w-[19rem]">
-          <Note seed="sealed-reels" paper="lined" hand className="w-full">
-            <div className="px-6 py-5">
-              <p className="text-2xl leading-[34px] md:text-[1.7rem]">
-                <WordReveal text="I sealed the Reels tab." />
-              </p>
-            </div>
-          </Note>
-          <Avatar
-            name="momm-neutral"
-            enter
-            className="mt-6 h-32 md:h-40"
-            sizes="(max-width: 768px) 30vw, 14vw"
-          />
-        </div>
-      </div>
-
-      {/* 3 — she sets the rules, and keeps score */}
+      {/* 2 — she sets the rules, and keeps score */}
       <div className="mx-auto mt-24 flex max-w-5xl flex-col items-center gap-10 md:mt-32 md:flex-row md:justify-center md:gap-14">
         <LimitsCard />
         <div className="flex flex-col items-center gap-6">

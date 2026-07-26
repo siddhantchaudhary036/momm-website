@@ -235,32 +235,3 @@ export function StreakCard({ className = "" }: { className?: string }) {
     </Glass>
   );
 }
-
-/** Instagram with the Reels tab sealed — the one screen worth showing whole */
-export function ReelsLockedCard({ className = "" }: { className?: string }) {
-  return (
-    <Glass className={`w-[min(88vw,19rem)] overflow-hidden ${className}`}>
-      <p className="px-5 pb-3 pt-5 font-sub text-lg italic text-white">Instagram</p>
-      <div className="flex flex-col gap-2 px-4">
-        <div className="h-20 rounded-xl bg-white/[0.07] blur-[1px]" />
-        <div className="h-20 rounded-xl bg-white/[0.05] blur-[1px]" />
-        <div className="mx-auto my-2 flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-[11px] text-white/80">
-          <Icon name="lock" size={13} />
-          Reels sealed shut — momm
-        </div>
-      </div>
-      <div className="mt-2 flex items-center justify-around border-t border-white/10 px-4 py-3.5 text-white/45">
-        <Icon name="home" size={19} className="text-white/85" />
-        <Icon name="search" size={19} />
-        <span className="relative text-white/20">
-          <Icon name="reels" size={19} />
-          <span className="absolute -right-1.5 -top-1.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#E8567A] text-white">
-            <Icon name="lock" size={8} strokeWidth={2.6} />
-          </span>
-        </span>
-        <Icon name="shop" size={19} />
-        <Icon name="person" size={19} />
-      </div>
-    </Glass>
-  );
-}

@@ -64,17 +64,20 @@ export default function Scene07Waitlist() {
 
   return (
     <section className="flex min-h-screen flex-col items-center justify-center px-6 py-16">
-      <div className="flex items-end gap-3 md:gap-8">
+      <div className="flex items-end gap-3 md:gap-10">
         <Note
           seed="make-momm-proud"
           paper="lined"
           fasten="tape"
           hand
           enter={false}
-          className="w-[min(88vw,28rem)]"
+          className="w-[min(90vw,34rem)]"
         >
-          <div className="px-7 py-6 md:px-9 md:py-7">
-            <p className="text-3xl leading-[34px] md:text-4xl" style={{ color: theme.pen }}>
+          <div className="px-8 py-7 md:px-11 md:py-9">
+            {/* the ask is the loudest thing on the door, so it writes across
+                two rules at a time rather than one — bigger, still on the
+                ruling, because 68px is 2 × RULE */}
+            <p className="text-4xl leading-[68px] md:text-5xl" style={{ color: theme.pen }}>
               <WordReveal
                 key={joined ? "joined" : "ask"}
                 text={joined ? "That's my kid." : "Ready to make momm proud?"}
@@ -87,7 +90,7 @@ export default function Scene07Waitlist() {
                   key="form"
                   onSubmit={submit}
                   exit={{ opacity: 0, y: -10 }}
-                  className="mt-4"
+                  className="mt-5"
                 >
                   <input
                     type="email"
@@ -99,29 +102,29 @@ export default function Scene07Waitlist() {
                     placeholder="your email here"
                     aria-label="email address"
                     aria-invalid={err !== null}
-                    className="w-full bg-transparent font-hand text-2xl outline-none placeholder:opacity-40 md:text-3xl"
+                    className="w-full bg-transparent font-hand text-3xl outline-none placeholder:opacity-40 md:text-4xl"
                     style={{
                       color: err !== null ? theme.danger : theme.pen,
-                      height: RULE,
-                      lineHeight: `${RULE}px`,
+                      height: RULE * 2,
+                      lineHeight: `${RULE * 2}px`,
                     }}
                   />
                   {err === "failed" && (
                     <p
                       role="alert"
-                      className="font-hand text-xl"
+                      className="font-hand text-2xl"
                       style={{ color: theme.danger, lineHeight: `${RULE}px` }}
                     >
                       momm didn&apos;t catch that. try again?
                     </p>
                   )}
-                  <MagneticButton className="mt-3 inline-block">
+                  <MagneticButton className="mt-4 inline-block">
                     <motion.button
                       whileHover={{ scale: 1.04 }}
                       whileTap={{ scale: 0.96 }}
                       type="submit"
                       disabled={pending}
-                      className="rounded-full px-7 py-3 font-header text-sm font-bold text-white disabled:opacity-60"
+                      className="rounded-full px-9 py-4 font-header text-base font-bold text-white disabled:opacity-60 md:text-lg"
                       style={{ backgroundColor: theme.ink }}
                     >
                       {pending ? "Telling momm…" : "Join the waitlist"}
@@ -145,8 +148,8 @@ export default function Scene07Waitlist() {
             <Avatar
               name={joined ? "momm-kid-hugging" : "momm-encouraging"}
               bob={!joined}
-              className="h-36 sm:h-44 md:h-56"
-              sizes="(max-width: 768px) 40vw, 22vw"
+              className="h-44 sm:h-52 md:h-72"
+              sizes="(max-width: 768px) 40vw, 26vw"
             />
           </motion.div>
         </AnimatePresence>

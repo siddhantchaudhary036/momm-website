@@ -34,12 +34,10 @@ All colors live in **`src/theme.ts`** — swap `gradient.from` (top) and
 ## The ride
 
 Typed hero → scroll-fill data reckoning (pickups · hours · 32 lost years ·
-social donut) → "Your mom was right." → 3D phone twist-in → sticky
-screen-swap of momm's behaviors → +6 years payoff → waitlist.
+social donut) → "Your mom was right." → she notices / she sets the limits →
++6 years payoff → waitlist.
 
 - **Fonts:** Bitter (headers / typed mom-lines) · Instrument Serif (sign-offs, captions)
 - **Motion:** framer-motion (scroll-scrubbed via `useScroll` + `useTransform`)
 - **Phone frames:** react-device-mockup (div-based, so they take live UI + 3D transforms)
 - **Waitlist:** `Scene07Waitlist.tsx` → `src/app/api/waitlist/route.ts` → Convex (see above)
-
-Stat sources are linked in the footer.
