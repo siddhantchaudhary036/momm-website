@@ -64,7 +64,17 @@ export default function Scene00Hero() {
   const toothSize = useTransform(scale, (s) => `${Math.min(140, 340 / s)}px`);
   /** how far through we are to being *on* the paper rather than at it */
   const land = useTransform(zoom, [0.25, 0.7], [0, 1]);
-  const hint = useTransform(scrollYProgress, [0, 0.12], [1, 0]);
+  /**
+   * Function form, not the `[0, 0.12] -> [1, 0]` range form.
+   *
+   * The range form did not update here: measured against the live page,
+   * this stayed pinned at 1 through the entire push-in while every other
+   * derived value on the same `scrollYProgress` advanced correctly, so
+   * the chevron sat on top of the fully-zoomed sheet. Whatever the cause,
+   * the explicit function is unambiguous and verified — don't "simplify"
+   * it back to a range without re-checking the value at scroll 400.
+   */
+  const hint = useTransform(scrollYProgress, (p) => Math.max(0, 1 - p / 0.12));
   /**
    * The note is vertically centred but momm hangs below it, so the group
    * reads bottom-heavy with a screen of dead air above. Lifting the sheet
@@ -106,7 +116,11 @@ export default function Scene00Hero() {
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-0 z-10"
-            style={{ opacity: land, background: PAPER_LIGHT }}
+            /* fixed attachment for the same reason PaperAct uses it: this
+               box stops being viewport-sized the moment the sticky
+               releases, and a vignette that reaches full strength 160px
+               early is exactly the residual step at the hand-over */
+            style={{ opacity: land, background: PAPER_LIGHT, backgroundAttachment: "fixed" }}
           />
 
           {/* the sheet — the thing we go through */}

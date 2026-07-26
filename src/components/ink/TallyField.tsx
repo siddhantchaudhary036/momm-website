@@ -36,11 +36,20 @@ const PER_GATE = 5;
  */
 const COLS = 6;
 
-const GATE_H = 58;
-const PITCH = 15;
-const CELL_W = 96;
-const CELL_H = 104;
-const PAD = 26;
+/**
+ * Gate geometry, and the gaps between gates.
+ *
+ * The cell used to be half again as wide as the gate that sits in it,
+ * which spread twenty-nine gates over an area they couldn't fill and left
+ * the block reading as a sparse texture rather than as a page somebody
+ * had run out of room on. Tightened until the gaps look like the pen
+ * moving on rather than like layout.
+ */
+const GATE_H = 66;
+const PITCH = 16;
+const CELL_W = 82;
+const CELL_H = 90;
+const PAD = 18;
 
 const N_GATES = Math.ceil(TOTAL / PER_GATE);
 const ROWS = Math.ceil(N_GATES / COLS);

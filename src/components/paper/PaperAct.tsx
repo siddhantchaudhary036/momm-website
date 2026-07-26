@@ -102,11 +102,23 @@ export default function PaperAct({
           opacity: PAPER_TOOTH_OPACITY,
         }}
       />
-      {/* the sheet is lit from the same window as everything else */}
+      {/*
+        The sheet is lit from the same window as everything else — and the
+        light is attached to the viewport, not to the act.
+
+        A percentage-positioned gradient sizes itself to its own box, and
+        these boxes are nothing alike: the hero's is one screen tall, this
+        one is eight. Left to scroll with the act, the same declaration
+        renders as a warm glow at the top of the hero and as flat vignette
+        mid-act, which put a visible horizontal band across the screen at
+        the exact frame the push-in hands over. Fixed attachment makes the
+        gradient viewport-sized in both places, which is the only way the
+        two creams are the same cream.
+      */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
-        style={{ background: PAPER_LIGHT }}
+        style={{ background: PAPER_LIGHT, backgroundAttachment: "fixed" }}
       />
 
       {edges === "both" && <Edge side="top" seed={`${seed}-top`} />}
