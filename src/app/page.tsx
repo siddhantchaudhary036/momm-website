@@ -6,7 +6,6 @@ import PaperOpen from "@/components/scenes/PaperOpen";
 import Scene00Hero from "@/components/scenes/Scene00Hero";
 import Scene07Waitlist from "@/components/scenes/Scene07Waitlist";
 import Scene08Footer from "@/components/scenes/Scene08Footer";
-import SkipToWaitlist from "@/components/ui/SkipToWaitlist";
 
 /**
  * You go through the door once, and after that it's all her paper.
@@ -55,8 +54,6 @@ export default function Home() {
       <PaperAct edges="top" fasten seed="signoff">
         <Scene08Footer />
       </PaperAct>
-
-      <SkipToWaitlist />
     </main>
   );
 }

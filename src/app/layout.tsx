@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Bitter, Caveat, Instrument_Serif } from "next/font/google";
-import CursorSpotlight from "@/components/CursorSpotlight";
 import CustomCursor from "@/components/CustomCursor";
 import Kitchen from "@/components/Kitchen";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -45,7 +44,6 @@ export default function RootLayout({
         className={`${bitter.variable} ${instrument.variable} ${caveat.variable} font-header antialiased`}
       >
         <Kitchen />
-        <CursorSpotlight />
         <CustomCursor />
         <SmoothScroll>{children}</SmoothScroll>
       </body>

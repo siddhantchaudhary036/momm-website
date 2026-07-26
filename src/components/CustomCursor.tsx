@@ -11,6 +11,14 @@ import { theme } from "@/theme";
  * (pointer: fine); fully disabled under reduced motion rather than
  * just de-animated, since a chasing ring is exactly the kind of motion
  * some users need off.
+ *
+ * Drawn white through `mix-blend-mode: difference` rather than in a fixed
+ * colour. The site is matte black for its first screen and cream for the
+ * rest, and a single ink-coloured cursor is invisible on the black half —
+ * which, since we've hidden the real cursor, means no cursor at all.
+ * Difference inverts against whatever is behind it: white over black, near
+ * ink over paper, correct on both without having to know which act the
+ * pointer is over.
  */
 export default function CustomCursor() {
   const reduced = useReducedMotion();
@@ -66,7 +74,11 @@ export default function CustomCursor() {
     <div
       aria-hidden
       className="pointer-events-none fixed inset-0 z-[9999]"
-      style={{ opacity: visible ? 1 : 0, transition: "opacity 0.2s" }}
+      style={{
+        opacity: visible ? 1 : 0,
+        transition: "opacity 0.2s",
+        mixBlendMode: "difference",
+      }}
     >
       {/* the dot — no lag */}
       <motion.div
@@ -78,7 +90,7 @@ export default function CustomCursor() {
           height: 6,
           marginLeft: -3,
           marginTop: -3,
-          backgroundColor: theme.ink,
+          backgroundColor: theme.text,
         }}
       />
       {/* the ring — trails slightly, blooms over clickables */}
@@ -89,8 +101,8 @@ export default function CustomCursor() {
           height: hovering ? 52 : 30,
           marginLeft: hovering ? -26 : -15,
           marginTop: hovering ? -26 : -15,
-          borderColor: hovering ? theme.ink : theme.ink + "88",
-          backgroundColor: hovering ? theme.ink + "14" : "transparent",
+          borderColor: hovering ? theme.text : theme.text + "88",
+          backgroundColor: hovering ? theme.text + "14" : "transparent",
         }}
         transition={{ type: "spring", stiffness: 300, damping: 24 }}
         style={{ x: ringX, y: ringY }}

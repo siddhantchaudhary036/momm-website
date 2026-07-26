@@ -8,7 +8,6 @@ import MagneticButton from "../MagneticButton";
 import WordReveal from "../WordReveal";
 import { RULE } from "../fridge/paper";
 import BlockedPhone from "../ui/BlockedPhone";
-import { WAITLIST_ID } from "../ui/SkipToWaitlist";
 import { theme } from "@/theme";
 
 /**
@@ -72,7 +71,8 @@ export default function Scene07Waitlist() {
 
   return (
     <section
-      id={WAITLIST_ID}
+      /* kept as a deep-link anchor — /#waitlist still lands here */
+      id="waitlist"
       className="flex min-h-screen flex-col items-center justify-center gap-14 px-6 py-20 xl:flex-row xl:gap-20"
     >
       <div className="flex items-end gap-3 md:gap-10">

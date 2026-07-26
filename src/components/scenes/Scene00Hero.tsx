@@ -1,8 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import Avatar from "../Avatar";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import Note from "../fridge/Note";
 import Tape from "../fridge/Tape";
 import WordReveal from "../WordReveal";
@@ -14,9 +13,11 @@ import { theme } from "@/theme";
 /**
  * SCENE 00 — the open, and the door into the rest of the site.
  *
- * Two jobs. First the hero it always was: one note taped to the fridge,
+ * Two jobs. First the hero it always was: one note taped to a black wall,
  * her voice, no frame and no tail, because a note on the fridge is
  * self-evidently from mom and the metaphor does the attribution for free.
+ * Nothing else is in shot — no cast, no scroll cue. One sheet, lit, on
+ * matte black, which is as much as a first screen ever needed.
  *
  * Then the transition the site was missing. Everything below this used to
  * be the same size as everything above it — notes at 30rem, avatars at
@@ -39,6 +40,14 @@ import { theme } from "@/theme";
 const MAX_SCALE = 13;
 /** where the hold ends and the push-in starts, in section progress */
 const PUSH = 0.36;
+/**
+ * Where her line finishes lighting up, in section progress.
+ *
+ * Comfortably inside {@link PUSH}: the words have to be fully lit *before*
+ * the sheet starts moving, or the reader is being asked to read something
+ * that's simultaneously receding and still arriving.
+ */
+const LINE_LIT = 0.28;
 
 export default function Scene00Hero() {
   const reduced = useReducedMotion();
@@ -48,7 +57,7 @@ export default function Scene00Hero() {
     offset: ["start start", "end end"],
   });
 
-  /** 0 while she's just standing there, 1 when the sheet is everything */
+  /** 0 while the sheet is just hanging there, 1 when it is everything */
   const zoom = useTransform(scrollYProgress, [PUSH, 1], [0, 1], { clamp: true });
 
   // exponential, so the approach accelerates the way moving toward
@@ -58,39 +67,29 @@ export default function Scene00Hero() {
   const writing = useTransform(zoom, [0, 0.3], [1, 0]);
   const rules = useTransform(zoom, [0.06, 0.5], [1, 0]);
   const shadow = useTransform(zoom, [0, 0.34], [1, 0]);
-  const cast = useTransform(zoom, [0, 0.16], [1, 0]);
   const tooth = useTransform(zoom, [0.2, 0.75], [0.06, 0.085]);
   // hold the fibre at a constant apparent size, landing on PaperAct's 340px
   const toothSize = useTransform(scale, (s) => `${Math.min(140, 340 / s)}px`);
   /** how far through we are to being *on* the paper rather than at it */
   const land = useTransform(zoom, [0.25, 0.7], [0, 1]);
   /**
-   * The note is vertically centred but momm hangs below it, so the group
-   * reads bottom-heavy with a screen of dead air above. Lifting the sheet
-   * optically centres the pair — and it has to come back to zero before
-   * the push-in, or we'd be zooming toward a point that isn't the middle
-   * of the screen and the sheet would slide as it grew.
+   * Her line lights word by word against the reader's own scrolling, the
+   * same way every other line on the site does.
+   *
+   * It starts partway along rather than at zero. A reveal that begins at
+   * zero has its whole line sitting at the dim floor before the first
+   * scroll — fine mid-page, where you've arrived reading, but this is the
+   * first thing anyone sees, and a headline that faint on load reads as a
+   * font that failed rather than an effect that hasn't started. The head
+   * start puts the wavefront on the first word immediately; see also the
+   * raised `dim` on the reveal itself, which keeps the words that haven't
+   * been reached yet legible instead of nearly invisible.
    */
-  const lift = useTransform(zoom, [0, 0.25], [-72, 0]);
+  const lineP = useTransform(scrollYProgress, [0, LINE_LIT], [0.12, 1], {
+    clamp: true,
+  });
 
-  // she notices if you just stand there
-  const [nudge, setNudge] = useState(false);
-  useEffect(() => {
-    if (reduced) return;
-    const t = setTimeout(() => setNudge(true), 6500);
-    const cancel = () => {
-      clearTimeout(t);
-      setNudge(false);
-      window.removeEventListener("scroll", cancel);
-    };
-    window.addEventListener("scroll", cancel, { once: true, passive: true });
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener("scroll", cancel);
-    };
-  }, [reduced]);
-
-  if (reduced) return <StaticHero nudge={false} />;
+  if (reduced) return <StaticHero />;
 
   return (
     <section ref={ref} className="relative h-[260vh]">
@@ -115,7 +114,7 @@ export default function Scene00Hero() {
           {/* the sheet — the thing we go through */}
           <motion.div
             className="relative w-[min(88vw,30rem)] origin-center"
-            style={{ scale, rotate, y: lift }}
+            style={{ scale, rotate }}
           >
             <motion.div
               aria-hidden
@@ -145,7 +144,16 @@ export default function Scene00Hero() {
                 style={{ opacity: writing, color: theme.pen, lineHeight: `${RULE}px` }}
               >
                 <p className="text-[2.4rem] font-bold leading-[34px] md:text-[3.4rem] md:leading-[68px]">
-                  <WordReveal text="Get off your phone!" delayMs={450} />
+                  {/* a tighter leading edge and a much higher floor than the
+                      body copy uses: four words is too short a line for a
+                      four-word feather, and a hero has to be readable before
+                      it's been scrolled */}
+                  <WordReveal
+                    text="Get off your phone!"
+                    progress={lineP}
+                    feather={2.5}
+                    dim={0.4}
+                  />
                 </p>
                 <p className="mt-3 text-right text-2xl opacity-80 md:text-3xl">— momm</p>
               </motion.div>
@@ -156,62 +164,6 @@ export default function Scene00Hero() {
               <Tape className="-right-5 -top-3" rotate={27} />
             </motion.div>
           </motion.div>
-
-          {/* she stands in front of the door, not on it */}
-          <motion.div
-            /* she rides the same lift as the sheet, or she detaches from
-               the note she's standing under */
-            style={{ opacity: cast, y: lift }}
-            /* margin rather than a second translate — two translate-x
-               utilities on one element resolve to whichever wins the
-               cascade, and the centring is the one that would lose */
-            className="absolute left-1/2 top-1/2 z-20 ml-12 mt-[6.5rem] -translate-x-1/2 md:ml-20 md:mt-[8.5rem]"
-          >
-            <div className="relative">
-              {/*
-                She's high-key flat vector with a white die-cut outline, and her
-                own cast shadow (Avatar's silhouette trick) is pure black — on
-                the black door behind her that shadow vanishes and she reads as
-                a sticker pasted into a void. A pool of light at her feet is the
-                cheapest floor there is; every other section she stands on is
-                light enough not to need one.
-              */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute bottom-1 left-1/2 z-0 h-10 w-[130%] -translate-x-1/2 rounded-[50%] sm:h-14"
-                style={{
-                  background:
-                    "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 70%)",
-                }}
-              />
-              <Avatar
-                name="momm-smirking"
-                priority
-                enter
-                delay={1.1}
-                className="relative z-10 h-44 sm:h-56 md:h-[17rem]"
-                sizes="(max-width: 768px) 40vw, 20vw"
-              />
-              <AnimatePresence>
-                {nudge && (
-                  <motion.div
-                    key="nudge"
-                    initial={{ opacity: 0, scale: 0.85, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.92 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                    className="absolute right-full top-6 mr-3 hidden sm:block"
-                  >
-                    <Note seed="im-waiting" paper="plain" fasten="tape-1" hand enter={false} className="w-36">
-                      <p className="px-4 py-3 text-center text-xl leading-tight">
-                        I&rsquo;m waiting.
-                      </p>
-                    </Note>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.div>
         </div>
       </div>
     </section>
@@ -219,8 +171,7 @@ export default function Scene00Hero() {
 }
 
 /** no push-in when motion is unwelcome — just the hero, one screen tall */
-function StaticHero({ nudge }: { nudge: boolean }) {
-  void nudge;
+function StaticHero() {
   return (
     <section className="relative flex h-screen flex-col items-center justify-center px-6">
       <Note seed="get-off-your-phone" paper="lined" fasten="tape" hand enter={false} className="w-[min(88vw,30rem)]">
@@ -231,22 +182,6 @@ function StaticHero({ nudge }: { nudge: boolean }) {
           <p className="mt-3 text-right text-2xl opacity-80 md:text-3xl">— momm</p>
         </div>
       </Note>
-      <div className="relative mt-8 md:mt-10">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute bottom-1 left-1/2 z-0 h-10 w-[130%] -translate-x-1/2 rounded-[50%] sm:h-14"
-          style={{
-            background:
-              "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0) 70%)",
-          }}
-        />
-        <Avatar
-          name="momm-smirking"
-          priority
-          className="relative z-10 h-44 sm:h-56 md:h-[17rem]"
-          sizes="40vw"
-        />
-      </div>
     </section>
   );
 }

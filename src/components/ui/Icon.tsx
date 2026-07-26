@@ -24,8 +24,7 @@ export type IconName =
   | "eye"
   | "lock"
   | "check"
-  | "heart"
-  | "chevronDown";
+  | "heart";
 
 const PATHS: Record<IconName, React.ReactNode> = {
   home: <path d="M3 10.5 12 3l9 7.5M5.5 9.5V20h13V9.5" />,
@@ -88,7 +87,6 @@ const PATHS: Record<IconName, React.ReactNode> = {
   heart: (
     <path d="M12 20s-7.5-4.6-7.5-9.4A4.1 4.1 0 0 1 12 8.2a4.1 4.1 0 0 1 7.5 2.4C19.5 15.4 12 20 12 20Z" />
   ),
-  chevronDown: <path d="m5.5 9 6.5 6.5L18.5 9" />,
 };
 
 export default function Icon({
