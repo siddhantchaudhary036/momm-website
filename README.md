@@ -7,10 +7,24 @@ nags like your mom (because she was right).
 
 ```bash
 npm install
+cp .env.example .env.local   # then fill both values in
 npm run dev
 ```
 
 → http://localhost:3000
+
+## The backend lives in the app repo
+
+All of Momm's Convex code — schema, functions, HTTP endpoints — is in
+`momm-app/convex/`, so there is one deployment and one schema. This site has no
+Convex client and no generated API: it knows the backend only as
+`CONVEX_SITE_URL` and talks to it from the server.
+
+Waitlist signups go `form → /api/waitlist (route handler) → POST /waitlist`
+on the deployment's `.convex.site` domain, authenticated with a shared
+`WAITLIST_INGEST_SECRET`. Both env vars are server-only, so nothing about the
+backend ships in the browser bundle. Changing what a signup *does* means editing
+`momm-app/convex/waitlist.ts`, not this repo.
 
 ## Change the colors
 
@@ -26,6 +40,6 @@ screen-swap of momm's behaviors → +6 years payoff → waitlist.
 - **Fonts:** Bitter (headers / typed mom-lines) · Instrument Serif (sign-offs, captions)
 - **Motion:** framer-motion (scroll-scrubbed via `useScroll` + `useTransform`)
 - **Phone frames:** react-device-mockup (div-based, so they take live UI + 3D transforms)
-- **Waitlist:** local-only for now — `TODO` marked in `Scene07Waitlist.tsx` for the Convex/API hookup
+- **Waitlist:** `Scene07Waitlist.tsx` → `src/app/api/waitlist/route.ts` → Convex (see above)
 
 Stat sources are linked in the footer.

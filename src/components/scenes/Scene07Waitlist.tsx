@@ -21,25 +21,49 @@ import { theme } from "@/theme";
  * and surveillance is what every other app in this category already sells.
  * She hugs you instead.
  *
- * Not wired to a backend yet: captures locally.
+ * Signups go to `/api/waitlist`, which proxies to Convex server-side.
  */
 export default function Scene07Waitlist() {
   const [email, setEmail] = useState("");
   const [joined, setJoined] = useState(false);
-  const [err, setErr] = useState(false);
+  const [pending, setPending] = useState(false);
+  /**
+   * Two failures that deserve different words: a malformed address is the
+   * visitor's to fix, a dead request is ours. Reddening the line and saying
+   * nothing would blame them for our outage.
+   */
+  const [err, setErr] = useState<null | "format" | "failed">(null);
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (pending) return;
+    // Instant feedback only — Convex is what actually decides what it'll store.
     if (!/^\S+@\S+\.\S+$/.test(email)) {
-      setErr(true);
+      setErr("format");
       return;
     }
-    // TODO: POST to Convex / API when the waitlist backend exists
-    setJoined(true);
+
+    setPending(true);
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        throw new Error(`/api/waitlist responded ${res.status}`);
+      }
+      setJoined(true);
+    } catch (cause) {
+      console.error("waitlist signup failed", cause);
+      setErr("failed");
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
-    <section className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 py-16">
+    <section className="flex min-h-screen flex-col items-center justify-center px-6 py-16">
       <div className="flex items-end gap-3 md:gap-8">
         <Note
           seed="make-momm-proud"
@@ -70,26 +94,37 @@ export default function Scene07Waitlist() {
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      setErr(false);
+                      setErr(null);
                     }}
                     placeholder="your email here"
                     aria-label="email address"
+                    aria-invalid={err !== null}
                     className="w-full bg-transparent font-hand text-2xl outline-none placeholder:opacity-40 md:text-3xl"
                     style={{
-                      color: err ? theme.danger : theme.pen,
+                      color: err !== null ? theme.danger : theme.pen,
                       height: RULE,
                       lineHeight: `${RULE}px`,
                     }}
                   />
+                  {err === "failed" && (
+                    <p
+                      role="alert"
+                      className="font-hand text-xl"
+                      style={{ color: theme.danger, lineHeight: `${RULE}px` }}
+                    >
+                      momm didn&apos;t catch that. try again?
+                    </p>
+                  )}
                   <MagneticButton className="mt-3 inline-block">
                     <motion.button
                       whileHover={{ scale: 1.04 }}
                       whileTap={{ scale: 0.96 }}
                       type="submit"
-                      className="rounded-full px-7 py-3 font-header text-sm font-bold text-white"
+                      disabled={pending}
+                      className="rounded-full px-7 py-3 font-header text-sm font-bold text-white disabled:opacity-60"
                       style={{ backgroundColor: theme.ink }}
                     >
-                      Join the waitlist
+                      {pending ? "Telling momm…" : "Join the waitlist"}
                     </motion.button>
                   </MagneticButton>
                 </motion.form>
@@ -116,10 +151,6 @@ export default function Scene07Waitlist() {
           </motion.div>
         </AnimatePresence>
       </div>
-
-      <p className="font-sub text-lg italic" style={{ color: theme.onDoor, opacity: 0.7 }}>
-        {joined ? "1,241" : "1,240"} already ditching their phones.
-      </p>
     </section>
   );
 }
