@@ -159,7 +159,8 @@ function Tally({ count }: { count: number }) {
         >
           times, today
         </span>
-        <Annotation dir="down-right" seed="every-six-minutes" className="mt-6 hidden lg:flex">
+        {/* points down at the tally when stacked, across at it when beside */}
+        <Annotation dir="down-right" seed="every-six-minutes" className="mt-4 md:mt-6">
           once every 6½ minutes
         </Annotation>
       </div>
@@ -184,12 +185,17 @@ function Tally({ count }: { count: number }) {
 function Dial({ p }: { p: number }) {
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center gap-5 px-6 pt-[8vh] md:flex-row md:gap-[3vw] md:px-[6vw] md:pt-[7vh]">
-      {/* width-capped on mobile for the same reason as the tally field —
-          the dial is a 1:1 square, so an h-vh reading on a tall narrow
-          screen produces an equally wide circle that runs off the sides */}
+      {/*
+        Width-capped at every breakpoint, because the dial is the one 1:1
+        chart on the page and it sits next to the widest number on it.
+        Sized off viewport height once there's a row to sit in, but the cap
+        has to stay: at 768 an uncapped 52vh dial is 532px square beside a
+        400px "5h 16m", and since both are shrink-0 the row simply hangs
+        ~96px off each side rather than giving anywhere.
+      */}
       <ClockDial
         p={p}
-        className="h-auto w-[64vw] max-w-[19rem] shrink-0 md:h-[52vh] md:w-auto md:max-w-none lg:h-[68vh]"
+        className="h-auto w-[64vw] max-w-[19rem] shrink-0 md:h-[52vh] md:w-auto md:max-w-[38vw] lg:h-[68vh] lg:max-w-[34vw]"
       />
 
       <div className="flex shrink-0 flex-col text-center md:text-left">
@@ -210,7 +216,8 @@ function Dial({ p }: { p: number }) {
         >
           of your sixteen waking hours
         </span>
-        <Annotation dir="up-left" seed="waking-third" className="mt-6 hidden lg:flex">
+        {/* aims back up at the dial, which sits above this when stacked */}
+        <Annotation dir="up-left" seed="waking-third" className="mt-4 md:mt-6">
           that&rsquo;s one waking hour in three
         </Annotation>
       </div>
@@ -245,7 +252,7 @@ function Life({ rule, lost }: { rule: number; lost: number }) {
         >
           years of it, gone
         </span>
-        <Annotation dir="down-right" seed="one-square-one-year" className="mt-6 hidden lg:flex">
+        <Annotation dir="down-right" seed="one-square-one-year" className="mt-4 md:mt-6">
           one square, one year
         </Annotation>
       </div>

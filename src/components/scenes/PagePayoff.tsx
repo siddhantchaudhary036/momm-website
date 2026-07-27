@@ -66,7 +66,7 @@ export default function PagePayoff() {
           >
             <WordReveal text="Look what I made." />
           </p>
-          <Annotation dir="down-right" seed="hers-to-give" className="mt-6 hidden lg:flex">
+          <Annotation dir="down-right" seed="hers-to-give" className="mt-4 md:mt-6">
             she gave these back
           </Annotation>
         </div>

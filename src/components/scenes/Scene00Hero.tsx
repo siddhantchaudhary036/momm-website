@@ -7,6 +7,7 @@ import Tape from "../fridge/Tape";
 import WordReveal from "../WordReveal";
 import { PAPER_SHADOW, RULE, TOOTH, paperBackground } from "../fridge/paper";
 import { PAPER_LIGHT } from "../paper/surface";
+import { HERO_ID } from "@/lib/anchors";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { theme } from "@/theme";
 
@@ -92,7 +93,7 @@ export default function Scene00Hero() {
   if (reduced) return <StaticHero />;
 
   return (
-    <section ref={ref} className="relative h-[260vh]">
+    <section ref={ref} id={HERO_ID} className="relative h-[260vh]">
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="relative flex h-full items-center justify-center px-6">
           {/* The window light, applied in viewport space rather than inside
@@ -111,9 +112,11 @@ export default function Scene00Hero() {
             style={{ opacity: land, background: PAPER_LIGHT, backgroundAttachment: "fixed" }}
           />
 
-          {/* the sheet — the thing we go through */}
+          {/* The sheet — the thing we go through. 84vw rather than 88: the
+              tape strips hang up to 24px past each edge, and at 88 they run
+              off the sides of a 320px phone. */}
           <motion.div
-            className="relative w-[min(88vw,30rem)] origin-center"
+            className="relative w-[min(84vw,30rem)] origin-center"
             style={{ scale, rotate }}
           >
             <motion.div
@@ -173,8 +176,11 @@ export default function Scene00Hero() {
 /** no push-in when motion is unwelcome — just the hero, one screen tall */
 function StaticHero() {
   return (
-    <section className="relative flex h-screen flex-col items-center justify-center px-6">
-      <Note seed="get-off-your-phone" paper="lined" fasten="tape" hand enter={false} className="w-[min(88vw,30rem)]">
+    <section
+      id={HERO_ID}
+      className="relative flex h-screen flex-col items-center justify-center px-6"
+    >
+      <Note seed="get-off-your-phone" paper="lined" fasten="tape" hand enter={false} className="w-[min(84vw,30rem)]">
         <div className="px-8 py-7 md:px-10 md:py-9">
           <p className="text-[2.4rem] font-bold leading-[34px] md:text-[3.4rem] md:leading-[68px]">
             Get off your phone!

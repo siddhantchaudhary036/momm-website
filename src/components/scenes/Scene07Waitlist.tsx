@@ -8,6 +8,7 @@ import MagneticButton from "../MagneticButton";
 import WordReveal from "../WordReveal";
 import { RULE } from "../fridge/paper";
 import BlockedPhone from "../ui/BlockedPhone";
+import { WAITLIST_ID } from "@/lib/anchors";
 import { theme } from "@/theme";
 
 /**
@@ -71,17 +72,18 @@ export default function Scene07Waitlist() {
 
   return (
     <section
-      /* kept as a deep-link anchor — /#waitlist still lands here */
-      id="waitlist"
+      /* a deep-link anchor, and what the floating skip control watches for */
+      id={WAITLIST_ID}
       className="flex min-h-screen flex-col items-center justify-center gap-14 px-6 py-20 xl:flex-row xl:gap-20"
     >
       {/*
-        The note wants the full width of a phone all by itself, so she cannot
-        stand beside it there — 88vw of paper plus a 134px avatar is 490px of
-        content in a 390px viewport, and the row used to just hang 50px off
-        both edges. She goes underneath until there's room for the pair.
+        The note wants a whole phone's width to itself, so she cannot stand
+        beside it until there's genuinely room for the pair — 84vw of paper
+        plus a ~220px avatar is 804px of content, which still doesn't fit a
+        768px tablet. She goes underneath until `lg`; the row used to hang
+        off both edges rather than give, since both items are shrink-0.
       */}
-      <div className="flex flex-col items-center gap-4 md:flex-row md:items-end md:gap-10">
+      <div className="flex flex-col items-center gap-4 lg:flex-row lg:items-end lg:gap-10">
         <Note
           seed="make-momm-proud"
           paper="lined"
