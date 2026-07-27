@@ -8,6 +8,18 @@
 
 html {
   color-scheme: light;
+  /*
+     Belt and braces with the rule on body below.
+     `Kitchen` is a fixed full-viewport layer, so it sizes to the initial
+     containing block — which on any browser with classic scrollbars is a few
+     px wider than the content area every block element gets. Those few px of
+     scrollable overshoot are enough to expose the matte-black layer down the
+     right-hand side of an otherwise cream page, and any future element that
+     overflows would do the same thing at a much larger scale. Clipping here
+     as well as on body means horizontal overshoot can never become
+     scrollable, whatever causes it.
+  */
+  overflow-x: clip;
 }
 
 body {

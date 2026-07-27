@@ -75,14 +75,22 @@ export default function Scene07Waitlist() {
       id="waitlist"
       className="flex min-h-screen flex-col items-center justify-center gap-14 px-6 py-20 xl:flex-row xl:gap-20"
     >
-      <div className="flex items-end gap-3 md:gap-10">
+      {/*
+        The note wants the full width of a phone all by itself, so she cannot
+        stand beside it there — 88vw of paper plus a 134px avatar is 490px of
+        content in a 390px viewport, and the row used to just hang 50px off
+        both edges. She goes underneath until there's room for the pair.
+      */}
+      <div className="flex flex-col items-center gap-4 md:flex-row md:items-end md:gap-10">
         <Note
           seed="make-momm-proud"
           paper="lined"
           fasten="tape"
           hand
           enter={false}
-          className="w-[min(88vw,34rem)]"
+          /* 84vw, not 88: the tape strips hang 20px past each edge of the
+             sheet, and at 88vw they clip on the narrowest phones */
+          className="w-[min(84vw,34rem)]"
         >
           <div className="px-8 py-7 md:px-11 md:py-9">
             {/* the ask is the loudest thing on the page, so it writes across
