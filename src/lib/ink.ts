@@ -29,6 +29,18 @@ export type PenOpts = {
   wavelength?: number;
   /** px the pen runs past each end */
   overshoot?: number;
+  /**
+   * px of arc between samples. Lower is smoother and bigger.
+   *
+   * The default suits the length of stroke this file was written for — a
+   * tally mark, an axis, a torn edge, all of them a few hundred px at most.
+   * A stroke that runs for thousands of px does not need the same density:
+   * the wander only has detail down to `wavelength`, so past about a sixth
+   * of that every extra sample is bytes on the wire buying a curve nobody
+   * can see. The kitchen's light rays run 2000+ units and set this to ~45,
+   * which is the difference between a 5 KB path and a 1 KB one.
+   */
+  step?: number;
 };
 
 const f = (n: number) => (Math.round(n * 10) / 10).toString();
@@ -79,8 +91,8 @@ function openSpline(pts: Pt[]): string {
 }
 
 /** one sample per ~11px, which is where more points stop changing the curve */
-function stepsFor(len: number) {
-  return Math.max(2, Math.min(160, Math.round(len / 11)));
+function stepsFor(len: number, step = 11) {
+  return Math.max(2, Math.min(160, Math.round(len / step)));
 }
 
 /* ----------------------------------------------------------- primitives */
@@ -103,7 +115,7 @@ export function inkLine(a: Pt, b: Pt, o: PenOpts): string {
   const total = len + head + tail;
   const w = wander(o.seed, wavelength);
 
-  const steps = stepsFor(total);
+  const steps = stepsFor(total, o.step);
   const pts: Pt[] = [];
   for (let i = 0; i <= steps; i++) {
     const s = (i / steps) * total - head;

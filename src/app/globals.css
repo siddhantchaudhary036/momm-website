@@ -124,6 +124,31 @@ body {
   }
 }
 
+/* The doorway, breathing.
+   Nine seconds and six per cent — far too slow and too shallow to watch,
+   which is the point. A beam that holds a single value forever is the one
+   tell that gives away that the room is a drawing; a beam you can see
+   pulsing is a nightclub. */
+.beam-breathe {
+  animation: beam-breathe 9s ease-in-out infinite;
+}
+
+@keyframes beam-breathe {
+  0%,
+  100% {
+    opacity: 0.94;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam-breathe {
+    animation: none;
+  }
+}
+
 /* CustomCursor takes over: hide the system cursor everywhere it's active */
 html.custom-cursor-active,
 html.custom-cursor-active * {
