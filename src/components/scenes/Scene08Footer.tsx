@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { theme } from "@/theme";
 
 /**
@@ -7,12 +8,33 @@ import { theme } from "@/theme";
  * along here like photos on a fridge; without them this is just the sign-off,
  * which is what the last thing on a note from your mother should be.
  *
+ * The one addition is the wordmark, which is the only place on the site the
+ * name is set in type rather than written by her — a footer is where a
+ * reader looks for whose site this was, and "— momm" in ballpoint answers
+ * who wrote the note, not who made the thing. Above the rule, so the plate
+ * reads as the mark and everything under it as the sign-off.
+ *
+ * It's shipped as artwork rather than reset in Bitter because the logo's
+ * face isn't Bitter, and a wordmark redrawn in whatever the site happens to
+ * load is a wordmark you no longer own. `public/brand/wordmark.webp` has had
+ * its own paper cut away by `npm run brand`, so what shows through the
+ * counters is this sheet's fibre.
+ *
  * Extra headroom because this sheet is taped down: the strips hang above the
  * act's top edge, and the divider shouldn't collide with them.
  */
 export default function Scene08Footer() {
   return (
     <footer className="flex flex-col items-center gap-6 px-6 pb-12 pt-14 text-center">
+      <Image
+        src="/brand/wordmark.webp"
+        alt="momm"
+        width={900}
+        height={180}
+        className="h-auto w-[9.5rem] opacity-90 md:w-[11rem]"
+        sizes="(max-width: 768px) 152px, 176px"
+      />
+
       <div
         className="h-px w-40"
         style={{ backgroundColor: theme.onDoor + "2E" }}

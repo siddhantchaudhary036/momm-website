@@ -28,11 +28,34 @@ const caveat = Caveat({
   variable: "--font-caveat",
 });
 
+/**
+ * Absolute URLs for the social card. Vercel hands us the deployment host
+ * for free; `NEXT_PUBLIC_SITE_URL` overrides it once there's a real
+ * domain, and localhost keeps `next build` from warning in between.
+ */
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
+
+const title = "momm — get off your phone.";
+const description =
+  "The screen-time app that nags like your mom, because she was right. Join the waitlist.";
+
+/**
+ * The icons and the social card aren't declared here: `favicon.ico`,
+ * `icon.png`, `apple-icon.png`, `opengraph-image.jpg` and
+ * `twitter-image.jpg` sit next to this file and Next picks them up by
+ * name, tags, dimensions and all. All five are built from the originals
+ * in `public/momm-images/` by `npm run brand` — edit those, not these.
+ */
 export const metadata: Metadata = {
-  title: "momm — get off your phone.",
-  description:
-    "The screen-time app that nags like your mom, because she was right. Join the waitlist.",
-  icons: { icon: "/logo.png" },
+  metadataBase: new URL(siteUrl),
+  title,
+  description,
+  openGraph: { title, description, url: "/", siteName: "momm", type: "website" },
+  twitter: { card: "summary_large_image", title, description },
 };
 
 export default function RootLayout({

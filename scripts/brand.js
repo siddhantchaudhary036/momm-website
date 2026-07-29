@@ -168,13 +168,61 @@ async function cutout(input, tolerance = 26) {
     if (y < H - 1) push(p + W);
   }
 
+  /**
+   * Then throw away everything that isn't her.
+   *
+   * What's left after the flood is the figure *plus* every fleck of dust
+   * in the photographed paper, because a speck is not paper-coloured and
+   * a speck in open space is not reachable from the frame's edge either.
+   * A handful of stray dark pixels are invisible in the original and
+   * ruinous once it's an asset: they're scattered corner to corner, so the
+   * drawing's bounding box becomes the whole 2000² frame and she ships at
+   * a tenth of the size she should be, adrift in her own padding.
+   *
+   * She is one drawing, so she is one connected run of pixels — the
+   * largest one. Everything else is dust.
+   */
+  const seen = new Uint8Array(W * H);
+  let best = null;
+  let bestSize = 0;
+  for (let s = 0; s < W * H; s++) {
+    if (bg[s] || seen[s]) continue;
+    const component = [];
+    seen[s] = 1;
+    queue[0] = s;
+    head = 0;
+    tail = 1;
+    while (head < tail) {
+      const p = queue[head++];
+      component.push(p);
+      const x = p % W;
+      const y = (p / W) | 0;
+      const step = (q) => {
+        if (!bg[q] && !seen[q]) {
+          seen[q] = 1;
+          queue[tail++] = q;
+        }
+      };
+      if (x > 0) step(p - 1);
+      if (x < W - 1) step(p + 1);
+      if (y > 0) step(p - W);
+      if (y < H - 1) step(p + W);
+    }
+    if (component.length > bestSize) {
+      bestSize = component.length;
+      best = component;
+    }
+  }
+  const keep = new Uint8Array(W * H);
+  for (const p of best) keep[p] = 1;
+
   const out = Buffer.alloc(W * H * 4);
   for (let p = 0; p < W * H; p++) {
     const i = p * C;
     out[p * 4] = data[i];
     out[p * 4 + 1] = data[i + 1];
     out[p * 4 + 2] = data[i + 2];
-    out[p * 4 + 3] = bg[p] ? 0 : 255;
+    out[p * 4 + 3] = keep[p] ? 255 : 0;
   }
   // the flood leaves a hard 1px edge; a hair of blur on alpha alone gives
   // the outline back the antialiasing the original drawing had
@@ -184,7 +232,28 @@ async function cutout(input, tolerance = 26) {
     .toBuffer();
   for (let p = 0; p < W * H; p++) out[p * 4 + 3] = soft[p * 4 + 3];
 
-  return sharp(out, { raw: { width: W, height: H, channels: 4 } }).trim({ threshold: 1 });
+  /**
+   * Cropped here rather than by `trim()`, which cannot do it: trim keys off
+   * the top-left pixel, and every transparent pixel in this buffer still
+   * carries the paper's own RGB — noisy fibre, no two alike — so it finds
+   * no uniform border and hands back the frame it was given.
+   */
+  let x0 = W, x1 = 0, y0 = H, y1 = 0;
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W; x++)
+      if (out[(y * W + x) * 4 + 3] > 2) {
+        if (x < x0) x0 = x;
+        if (x > x1) x1 = x;
+        if (y < y0) y0 = y;
+        if (y > y1) y1 = y;
+      }
+
+  return sharp(out, { raw: { width: W, height: H, channels: 4 } }).extract({
+    left: x0,
+    top: y0,
+    width: x1 - x0 + 1,
+    height: y1 - y0 + 1,
+  });
 }
 
 // ── the icon ────────────────────────────────────────────────────────────
@@ -272,11 +341,14 @@ async function ogCard() {
   const { image: lockup } = await inkToAlpha(
     await sharp(src("logo.png")).extract(TAGLINE).toBuffer(),
   );
-  const type = await lockup.trim({ threshold: 6 }).resize({ width: 560 }).png().toBuffer();
+  /** equal air down both edges — the type and the figure are the content */
+  const MARGIN = 110;
+
+  const type = await lockup.trim({ threshold: 6 }).resize({ width: 620 }).png().toBuffer();
   const typeMeta = await sharp(type).metadata();
 
   const figure = await (await cutout(src("logo-momm.png")))
-    .resize({ height: 470 })
+    .resize({ height: 500 })
     .png()
     .toBuffer();
   const figMeta = await sharp(figure).metadata();
@@ -286,16 +358,16 @@ async function ogCard() {
     .composite([
       {
         input: type,
-        left: 96,
+        left: MARGIN,
         top: Math.round((H - typeMeta.height) / 2) - 18,
       },
       {
-        // she stands on the bottom edge, not floating above it, and far
-        // enough right that the full stop after her name isn't touching
-        // her hair — at 620 wide the lockup ran into her
+        // standing on the bottom edge rather than floating above the middle
+        // of it, which is the difference between a figure in a room and a
+        // sticker on a card
         input: figure,
-        left: W - figMeta.width - 72,
-        top: H - figMeta.height - 40,
+        left: W - figMeta.width - MARGIN,
+        top: H - figMeta.height - 50,
       },
     ])
     // paper grain is the worst case for PNG — the same card costs 1.3MB

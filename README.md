@@ -26,6 +26,31 @@ on the deployment's `.convex.site` domain, authenticated with a shared
 backend ships in the browser bundle. Changing what a signup *does* means editing
 `momm-app/convex/waitlist.ts`, not this repo.
 
+## The logo
+
+The five originals live in `public/momm-images/` and are never served —
+they're 2000px PNGs of ink on photographed paper, six megabytes each.
+Everything the site actually shows is built from them:
+
+```bash
+npm run brand
+```
+
+That writes the favicon (`.ico`, 16/32/48), `icon.png`, `apple-icon.png` and
+the 1200×630 social card into `src/app/`, where Next picks all five up by
+filename — which is why `layout.tsx` declares no `icons` at all — plus the
+transparent wordmark and figure into `public/brand/`.
+
+"Transparent" is the point: the originals carry their own cream paper, and
+dropping that onto the site's cream paper leaves a visible rectangle, because
+no two photographs of paper are the same cream. The script lifts the ink off
+its background (flat type by coverage, the drawing by flood-filling in from
+the frame edge) so the page's own fibre shows through. Re-run it after
+changing anything in `momm-images/`; don't hand-edit the outputs.
+
+Set `NEXT_PUBLIC_SITE_URL` in production so the social card's `og:image` URL
+is absolute. On Vercel the deployment host is used automatically.
+
 ## Change the colors
 
 All colors live in **`src/theme.ts`** — swap `gradient.from` (top) and
