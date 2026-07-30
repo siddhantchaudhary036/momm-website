@@ -8,7 +8,15 @@ import WordReveal from "../WordReveal";
 import Annotation from "../ink/Annotation";
 import { Ink, PEN, StrokeInView } from "../ink/Ink";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { hatchRect, inkArc, inkCircleAround, inkLine, inkRect } from "@/lib/ink";
+import {
+  hatchRect,
+  inkArc,
+  inkCircleAround,
+  inkLine,
+  inkRect,
+  type Pt,
+} from "@/lib/ink";
+import { DATA, INSTANT } from "@/lib/motion";
 import { rngFrom } from "@/lib/prng";
 
 /**
@@ -39,54 +47,119 @@ import { rngFrom } from "@/lib/prng";
 const PHONE_W = 54;
 const PHONE_H = 96;
 
-function phoneDoodle() {
-  return {
-    body: inkRect(6, 4, PHONE_W - 12, PHONE_H - 8, {
-      seed: "phone-body",
-      amp: 1.1,
-      overshoot: 2.5,
-    }),
-    screen: hatchRect(13, 13, PHONE_W - 26, PHONE_H - 32, {
-      seed: "phone-screen",
-      spacing: 4.5,
-      angle: 42,
-      amp: 0.8,
-      wavelength: 46,
-      overshoot: 2,
-    }),
-    home: inkLine(
+/**
+ * The whole 4.6-second choreography, in one place and one unit.
+ *
+ * These numbers were originally spread across ~19 JSX attributes in two
+ * unit systems — milliseconds on the stroke components, seconds on the
+ * framer transitions — with adjacent beats straddling the split (she
+ * arrives at `3.5`, her sparks at `3900`). Every value was derived by hand
+ * from the one before it, so inserting a beat meant re-deriving the tail
+ * and a unit slip was a 1000× error you could only catch by watching.
+ *
+ * Milliseconds throughout; `secs()` converts at the two framer call sites.
+ */
+const BEAT = {
+  phoneBody: 650,
+  phoneScreen: 1000,
+  phoneHome: 1450,
+  crossOut: 1850,
+  secondLine: 2450,
+  proud: 2900,
+  ring: 3250,
+  smileEyes: 3400,
+  smileMouth: 3550,
+  mommArrives: 3500,
+  sparks: 3900,
+  signOff: 4500,
+} as const;
+
+const secs = (ms: number) => ms / 1000;
+
+/** one drawn mark: geometry plus where it lands in the timeline */
+type Mark = {
+  d: string;
+  stroke: string;
+  strokeWidth: number;
+  speed: number;
+  delay: number;
+  opacity?: number;
+};
+
+/**
+ * The phone, drawn then struck out.
+ *
+ * Returned as a flat list rather than a `{body, screen, home, scribble}`
+ * record: the keys were only ever used to feed four adjacent call sites in
+ * order, and unrolling them cost twelve near-identical `<StrokeInView>`
+ * lines whose only real variable was a hand-computed delay.
+ */
+function phoneDoodle(): Mark[] {
+  const body = inkRect(6, 4, PHONE_W - 12, PHONE_H - 8, {
+    seed: "phone-body",
+    amp: 1.1,
+    overshoot: 2.5,
+  }).map((d, i) => ({
+    d,
+    stroke: PEN.ink,
+    strokeWidth: 2.6,
+    speed: 260,
+    delay: BEAT.phoneBody + i * 60,
+  }));
+
+  const screen = hatchRect(13, 13, PHONE_W - 26, PHONE_H - 32, {
+    seed: "phone-screen",
+    spacing: 4.5,
+    angle: 42,
+    amp: 0.8,
+    wavelength: 46,
+    overshoot: 2,
+  }).map((d, i) => ({
+    d,
+    stroke: PEN.ink,
+    strokeWidth: 1.6,
+    speed: 140,
+    delay: BEAT.phoneScreen + i * 40,
+    opacity: 0.5,
+  }));
+
+  const home = {
+    d: inkLine(
       { x: PHONE_W / 2 - 8, y: PHONE_H - 13 },
       { x: PHONE_W / 2 + 8, y: PHONE_H - 13 },
       { seed: "phone-home", amp: 0.5, wavelength: 30, overshoot: 1.5 },
     ),
-    /**
-     * The cross-out, in `PEN.loss` rather than her ink — the same red the
-     * reckoning uses for what the phone has taken. Wobble past amp 3 is
-     * flagged in `lib/ink.ts` as tipping from "a mother's notepad" into
-     * "a webcomic"; that's exactly the register a fast cross-out wants,
-     * and it's the one place on the site that earns it.
-     */
-    scribble: [
-      inkLine({ x: 1, y: 6 }, { x: PHONE_W - 1, y: PHONE_H - 4 }, {
-        seed: "phone-x-a",
-        amp: 3.2,
-        wavelength: 55,
-        overshoot: 6,
-      }),
-      inkLine({ x: PHONE_W - 3, y: 8 }, { x: 3, y: PHONE_H - 6 }, {
-        seed: "phone-x-b",
-        amp: 3.2,
-        wavelength: 55,
-        overshoot: 6,
-      }),
-      inkLine({ x: -1, y: PHONE_H * 0.56 }, { x: PHONE_W + 1, y: PHONE_H * 0.44 }, {
-        seed: "phone-x-c",
-        amp: 3.6,
-        wavelength: 60,
-        overshoot: 6,
-      }),
-    ],
+    stroke: PEN.ink,
+    strokeWidth: 2.2,
+    speed: 200,
+    delay: BEAT.phoneHome,
   };
+
+  /**
+   * The cross-out, in `PEN.loss` rather than her ink — the same red the
+   * reckoning uses for what the phone has taken. Wobble past amp 3 is
+   * flagged in `lib/ink.ts` as tipping from "a mother's notepad" into
+   * "a webcomic"; that's exactly the register a fast cross-out wants,
+   * and it's the one place on the site that earns it.
+   *
+   * Seeds stay the literal `a`/`b`/`c` they were tuned at — the wobble is
+   * a hash of the seed, so renaming them to indices would reshuffle a
+   * scribble that was already checked on screen.
+   */
+  const strokes: [string, Pt, Pt, number, number, number, number][] = [
+    ["a", { x: 1, y: 6 }, { x: PHONE_W - 1, y: PHONE_H - 4 }, 3.2, 55, 3.2, 220],
+    ["b", { x: PHONE_W - 3, y: 8 }, { x: 3, y: PHONE_H - 6 }, 3.2, 55, 3.2, 220],
+    ["c", { x: -1, y: PHONE_H * 0.56 }, { x: PHONE_W + 1, y: PHONE_H * 0.44 }, 3.6, 60, 3.4, 240],
+  ];
+  const scribble = strokes.map(([id, a, b, amp, wavelength, strokeWidth, speed], i) => ({
+    d: inkLine(a, b, { seed: `phone-x-${id}`, amp, wavelength, overshoot: 6 }),
+    stroke: PEN.loss,
+    strokeWidth,
+    speed,
+    delay: BEAT.crossOut + i * 165,
+  }));
+
+  return [...body, ...screen, home, ...scribble];
 }
 
 /**
@@ -96,27 +169,37 @@ function phoneDoodle() {
  * off a nib, so the eyes are near-zero-length round-capped lines instead —
  * a poke, not a fill.
  */
-function smileyDoodle() {
-  return {
-    mouth: inkArc(22, 9, 11, Math.PI, 0, {
-      seed: "smile-mouth",
-      amp: 1,
-      wavelength: 60,
-      overshoot: 3,
-    }),
-    eyeL: inkLine({ x: 12, y: 4 }, { x: 12.8, y: 4.6 }, {
-      seed: "smile-eye-l",
+function smileyDoodle(): Mark[] {
+  // the eyes differ only in x, so they're generated; the mouth genuinely
+  // differs and stays written out
+  const eyes = ([["l", 12], ["r", 31]] as const).map(([id, x], i) => ({
+    d: inkLine({ x, y: 4 }, { x: x + 0.8, y: 4.6 }, {
+      seed: `smile-eye-${id}`,
       amp: 0.2,
       wavelength: 16,
       overshoot: 0.4,
     }),
-    eyeR: inkLine({ x: 31, y: 4 }, { x: 31.8, y: 4.6 }, {
-      seed: "smile-eye-r",
-      amp: 0.2,
-      wavelength: 16,
-      overshoot: 0.4,
-    }),
-  };
+    stroke: PEN.ink,
+    strokeWidth: 4,
+    speed: 120,
+    delay: BEAT.smileEyes + i * 60,
+  }));
+
+  return [
+    ...eyes,
+    {
+      d: inkArc(22, 9, 11, Math.PI, 0, {
+        seed: "smile-mouth",
+        amp: 1,
+        wavelength: 60,
+        overshoot: 3,
+      }),
+      stroke: PEN.ink,
+      strokeWidth: 2.2,
+      speed: 420,
+      delay: BEAT.smileMouth,
+    },
+  ];
 }
 
 /** a small burst above her head — the one non-diegetic mark on the page */
@@ -155,22 +238,43 @@ export default function PaperOpen() {
    * the circle stranded next to the word instead of around it.
    */
   useEffect(() => {
+    const c = containerRef.current;
+    if (c === null) return;
+
     const measure = () => {
-      const c = containerRef.current;
       const t = proudRef.current;
-      if (c === null || t === null) return;
+      if (t === null) return;
       const cb = c.getBoundingClientRect();
       const tb = t.getBoundingClientRect();
-      setCircle({
+      const next = {
         cx: tb.left - cb.left + tb.width / 2,
         cy: tb.top - cb.top + tb.height / 2,
         rx: tb.width / 2 + 8,
         ry: tb.height / 2 + 11,
-      });
+      };
+      /*
+        Bail out when nothing moved. `measure` runs three times on a normal
+        mount — directly, from the observer's initial delivery, and again
+        once webfonts settle — and ResizeObserver then fires per frame for
+        the whole of a window drag. Setting a fresh object each time made
+        every one of those a re-render *and* a rebuild of both circle
+        splines (~130µs of sine each). Returning `prev` keeps the identity
+        stable, so React skips the render and the memo below actually holds.
+      */
+      setCircle((prev) =>
+        prev !== null &&
+        Math.abs(prev.cx - next.cx) < 0.5 &&
+        Math.abs(prev.cy - next.cy) < 0.5 &&
+        Math.abs(prev.rx - next.rx) < 0.5 &&
+        Math.abs(prev.ry - next.ry) < 0.5
+          ? prev
+          : next,
+      );
     };
+
     measure();
     const ro = new ResizeObserver(measure);
-    if (containerRef.current !== null) ro.observe(containerRef.current);
+    ro.observe(c);
     document.fonts?.ready?.then(measure).catch(() => {});
     return () => ro.disconnect();
   }, []);
@@ -200,37 +304,20 @@ export default function PaperOpen() {
             h={PHONE_H}
             className="ml-3 inline-block h-16 w-auto align-[-0.32em] md:h-20"
           >
-            <StrokeInView d={phone.body[0]} stroke={PEN.ink} strokeWidth={2.6} speed={260} delay={650} amount={0.2} />
-            <StrokeInView d={phone.body[1]} stroke={PEN.ink} strokeWidth={2.6} speed={260} delay={710} amount={0.2} />
-            <StrokeInView d={phone.body[2]} stroke={PEN.ink} strokeWidth={2.6} speed={260} delay={770} amount={0.2} />
-            <StrokeInView d={phone.body[3]} stroke={PEN.ink} strokeWidth={2.6} speed={260} delay={830} amount={0.2} />
-            {phone.screen.map((d, i) => (
-              <StrokeInView
-                key={i}
-                d={d}
-                stroke={PEN.ink}
-                strokeWidth={1.6}
-                speed={140}
-                delay={1000 + i * 40}
-                amount={0.2}
-                opacity={0.5}
-              />
+            {phone.map((m, i) => (
+              <StrokeInView key={i} amount={0.2} {...m} />
             ))}
-            <StrokeInView d={phone.home} stroke={PEN.ink} strokeWidth={2.2} speed={200} delay={1450} amount={0.2} />
-            <StrokeInView d={phone.scribble[0]} stroke={PEN.loss} strokeWidth={3.2} speed={220} delay={1850} amount={0.2} />
-            <StrokeInView d={phone.scribble[1]} stroke={PEN.loss} strokeWidth={3.2} speed={220} delay={2010} amount={0.2} />
-            <StrokeInView d={phone.scribble[2]} stroke={PEN.loss} strokeWidth={3.4} speed={240} delay={2180} amount={0.2} />
           </Ink>
         </p>
 
         <p className="mt-4 t-display font-hand" style={{ color: PEN.ink, lineHeight: 1.08 }}>
-          <WordReveal text="Make momm" sweepMs={650} delayMs={2450} />{" "}
+          <WordReveal text="Make momm" sweepMs={650} delayMs={BEAT.secondLine} />{" "}
           <motion.span
             ref={proudRef}
             initial={reduced ? false : { opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, amount: 0.6 }}
-            transition={{ duration: 0.4, delay: reduced ? 0 : 2.9 }}
+            transition={reduced ? INSTANT : { ...DATA, delay: secs(BEAT.proud) }}
             className="relative inline-block"
           >
             proud.
@@ -240,9 +327,9 @@ export default function PaperOpen() {
             h={30}
             className="ml-2 inline-block h-8 w-auto align-[-0.1em] md:h-9"
           >
-            <StrokeInView d={smile.mouth} stroke={PEN.ink} strokeWidth={2.2} speed={420} delay={3550} amount={0.2} />
-            <StrokeInView d={smile.eyeL} stroke={PEN.ink} strokeWidth={4} speed={120} delay={3400} amount={0.2} />
-            <StrokeInView d={smile.eyeR} stroke={PEN.ink} strokeWidth={4} speed={120} delay={3460} amount={0.2} />
+            {smile.map((m, i) => (
+              <StrokeInView key={i} amount={0.2} {...m} />
+            ))}
           </Ink>
         </p>
 
@@ -259,7 +346,7 @@ export default function PaperOpen() {
                 stroke={PEN.ink}
                 strokeWidth={2.4}
                 speed={480}
-                delay={3250 + i * 260}
+                delay={BEAT.ring + i * 260}
                 amount={0}
               />
             ))}
@@ -280,7 +367,7 @@ export default function PaperOpen() {
           <Avatar
             name="momm-proud"
             enter
-            delay={3.5}
+            delay={secs(BEAT.mommArrives)}
             className="h-40 md:h-64 lg:h-[22rem]"
             sizes="26vw"
           />
@@ -293,7 +380,7 @@ export default function PaperOpen() {
                   stroke={PEN.ink}
                   strokeWidth={2}
                   speed={200}
-                  delay={3900 + i * 70}
+                  delay={BEAT.sparks + i * 70}
                   amount={0.1}
                 />
               ))}
@@ -302,7 +389,7 @@ export default function PaperOpen() {
         </div>
       </Standing>
 
-      <Standing className="bottom-[3vh] left-[6vw] max-w-[15rem] md:left-[8vw]">
+      <Standing className="bottom-[3vh] left-[6vw] md:left-[8vw]">
         {/*
           Annotation only staggers its arrow — the caption text itself has
           no delay of its own and renders at full opacity the instant it
@@ -310,14 +397,19 @@ export default function PaperOpen() {
           first thing legible on the screen, ahead of the headline it's
           supposed to close out. It needs to be the last mark on the page,
           so the fade-in is added here rather than in the shared component.
+
+          Both halves read from `BEAT.signOff` so the text and its arrow
+          can't drift apart — they were previously 4.5 (seconds) and 4600
+          (ms), two constants in two units that had to be kept in step by
+          hand.
         */}
         <motion.div
           initial={reduced ? false : { opacity: 0, y: 6 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.4, delay: reduced ? 0 : 4.5 }}
+          transition={reduced ? INSTANT : { ...DATA, delay: secs(BEAT.signOff) }}
         >
-          <Annotation dir="down" seed="counted-every-one" delay={4600}>
+          <Annotation dir="down" seed="counted-every-one" delay={BEAT.signOff + 100}>
             but she counted every one.
           </Annotation>
         </motion.div>

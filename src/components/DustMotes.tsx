@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { intensity, TALL, toViewBox, WARM, WIDE, WIDE_FROM } from "@/lib/beam";
+import { intensity, TALL, WARM, WIDE, WIDE_QUERY } from "@/lib/beam";
 import { HERO_ID } from "@/lib/anchors";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
@@ -34,11 +34,15 @@ const DRIFT = 0.007;
 /** how far a mote wanders sideways, in screens */
 const SWAY = 0.022;
 
+/** the ink, resolved once — assigning `strokeStyle` re-parses the colour */
+const STROKE = `rgb(${WARM})`;
+
 type Mote = {
   x: number;
   y: number;
-  len: number;
-  angle: number;
+  /** half-extent of the fleck, precomputed — `angle`/`len` never change */
+  dx: number;
+  dy: number;
   phase: number;
   speed: number;
 };
@@ -63,27 +67,63 @@ export default function DustMotes() {
     /** whichever composition the CSS is showing — masking against the other
      *  one is dust glowing in the dark and a beam full of nothing */
     let active = WIDE;
+    /* the `xMidYMid slice` mapping, resolved once per resize instead of
+       per mote per frame — it only depends on the viewport and the frame */
+    let scale = 1;
+    let offX = 0;
+    let offY = 0;
+
+    const wide = window.matchMedia(WIDE_QUERY);
+
     const size = () => {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       w = window.innerWidth;
       h = window.innerHeight;
-      active = w >= WIDE_FROM ? WIDE : TALL;
-      el.width = Math.round(w * dpr);
-      el.height = Math.round(h * dpr);
+      active = wide.matches ? WIDE : TALL;
+
+      scale = Math.max(w / active.vb.w, h / active.vb.h);
+      offX = (w - active.vb.w * scale) / 2;
+      offY = (h - active.vb.h * scale) / 2;
+
+      /* only touch the backing store when it actually changes: assigning
+         `width` reallocates and clears it (33 MB at 1920×1080 DPR 2), and
+         mobile fires `resize` on every address-bar show/hide, where the
+         pixel size is identical */
+      const nw = Math.round(w * dpr);
+      const nh = Math.round(h * dpr);
+      if (el.width !== nw || el.height !== nh) {
+        el.width = nw;
+        el.height = nh;
+      }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     size();
-    window.addEventListener("resize", size);
 
-    const motes: Mote[] = Array.from({ length: COUNT }, () => ({
-      x: Math.random(),
-      y: Math.random(),
-      len: 1.6 + Math.random() * 4.4,
+    /* coalesce into one frame — `resize` fires continuously during a window
+       drag, and `innerWidth`/`innerHeight` force synchronous layout */
+    let queued = 0;
+    const onResize = () => {
+      if (queued !== 0) return;
+      queued = requestAnimationFrame(() => {
+        queued = 0;
+        size();
+      });
+    };
+    window.addEventListener("resize", onResize);
+
+    const motes: Mote[] = Array.from({ length: COUNT }, () => {
+      const len = 1.6 + Math.random() * 4.4;
       // along the beam, but loosely — dust tumbles, it doesn't file
-      angle: active.axis + (Math.random() - 0.5) * 1.5,
-      phase: Math.random() * Math.PI * 2,
-      speed: 0.4 + Math.random() * 0.9,
-    }));
+      const angle = active.axis + (Math.random() - 0.5) * 1.5;
+      return {
+        x: Math.random(),
+        y: Math.random(),
+        dx: (Math.cos(angle) * len) / 2,
+        dy: (Math.sin(angle) * len) / 2,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.4 + Math.random() * 0.9,
+      };
+    });
 
     let raf = 0;
     let running = true;
@@ -91,7 +131,12 @@ export default function DustMotes() {
     const frame = (now: number) => {
       const t = now / 1000;
       ctx.clearRect(0, 0, w, h);
+      /* all three are constant for the life of the animation, but they have
+         to be re-set per frame rather than once at setup: assigning
+         `el.width` in `size()` resets the whole 2D context state */
       ctx.lineCap = "round";
+      ctx.strokeStyle = STROKE;
+      ctx.lineWidth = 0.9;
 
       for (const m of motes) {
         const x = m.x + Math.sin(t * 0.13 * m.speed + m.phase) * SWAY;
@@ -99,21 +144,15 @@ export default function DustMotes() {
         // invisible because no two motes cross the seam in the same place
         const y = (m.y + t * DRIFT * m.speed) % 1;
 
-        const vb = toViewBox(active, x * w, y * h, w, h);
-        const lit = intensity(active, vb.x, vb.y);
-        if (lit < 0.015) continue;
-
         const px = x * w;
         const py = y * h;
-        const dx = (Math.cos(m.angle) * m.len) / 2;
-        const dy = (Math.sin(m.angle) * m.len) / 2;
+        const lit = intensity(active, (px - offX) / scale, (py - offY) / scale);
+        if (lit < 0.015) continue;
 
         ctx.globalAlpha = Math.min(0.72, lit * 1.5);
-        ctx.strokeStyle = `rgb(${WARM})`;
-        ctx.lineWidth = 0.9;
         ctx.beginPath();
-        ctx.moveTo(px - dx, py - dy);
-        ctx.lineTo(px + dx, py + dy);
+        ctx.moveTo(px - m.dx, py - m.dy);
+        ctx.lineTo(px + m.dx, py + m.dy);
         ctx.stroke();
       }
 
@@ -148,7 +187,8 @@ export default function DustMotes() {
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", size);
+      if (queued !== 0) cancelAnimationFrame(queued);
+      window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVisibility);
       io?.disconnect();
     };

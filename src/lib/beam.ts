@@ -28,6 +28,12 @@
 import type { Pt } from "./ink";
 import { rngFrom } from "./prng";
 
+/** trim a value to `dp` decimals — see the note in `stipple` on why */
+const round = (n: number, dp: number) => {
+  const k = 10 ** dp;
+  return Math.round(n * k) / k;
+};
+
 export type Frame = {
   /** the drawing's own coordinate space */
   vb: { w: number; h: number };
@@ -203,11 +209,20 @@ export function stipple(f: Frame, seed: string): Speck[] {
     const y = f.source.y + rand() * (f.vb.h + 460);
     const lit = intensity(f, x, y);
     if (lit < 0.03 || rand() > lit * 1.3) continue;
+    /**
+     * Rounded, and it matters more than it looks. These land in the markup
+     * as raw attributes, and a full float64 mantissa
+     * (`cx="767.0407303329557"`) is maximum-entropy text — it doesn't just
+     * cost its own characters, it defeats gzip across the whole run of ~580
+     * circles. Two decimal places of a sub-pixel speck are invisible and
+     * cut the compressed size of this layer by about three quarters.
+     * `lib/ink.ts` rounds its path data for the same reason.
+     */
     out.push({
-      x,
-      y,
-      r: 0.7 + rand() * 1.8,
-      opacity: 0.07 + lit * 0.75 * rand(),
+      x: round(x, 1),
+      y: round(y, 1),
+      r: round(0.7 + rand() * 1.8, 2),
+      opacity: round(0.07 + lit * 0.75 * rand(), 3),
     });
   }
   return out;
@@ -234,8 +249,14 @@ export function toViewBox(f: Frame, px: number, py: number, vw: number, vh: numb
 /**
  * Which composition is on screen.
  *
- * One number, here, shared by the CSS that shows the right SVG and the
- * canvas that has to agree with it — a canvas masking against the desktop
- * beam while the phone one is displayed is dust glowing in the dark.
+ * Expressed as the media query itself rather than as a pixel number,
+ * because the other half of this decision is Tailwind's `md:` — and in
+ * Tailwind v4 that is `48rem`, not `768px`. Against a browser whose default
+ * font size isn't 16px (an accessibility setting, not an exotic one) a
+ * `innerWidth >= 768` test and a `md:` class disagree, which puts the mote
+ * canvas on one frame while the CSS is showing the other: dust glowing
+ * where there is no beam, and a beam with no dust in it.
+ *
+ * Same string, same units, one decision.
  */
-export const WIDE_FROM = 768;
+export const WIDE_QUERY = "(min-width: 48rem)";

@@ -152,7 +152,7 @@ export function inkPolyline(pts: Pt[], o: PenOpts): string {
     };
   };
 
-  const steps = stepsFor(total);
+  const steps = stepsFor(total, o.step);
   const out: Pt[] = [];
   for (let i = 0; i <= steps; i++) {
     const s = (i / steps) * total;
@@ -180,7 +180,7 @@ export function inkArc(
   const tail = (overshoot * rand()) / r;
   const w = wander(o.seed, wavelength);
 
-  const steps = stepsFor(spanLen + overshoot * 2);
+  const steps = stepsFor(spanLen + overshoot * 2, o.step);
   const pts: Pt[] = [];
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;

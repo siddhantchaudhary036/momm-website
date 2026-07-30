@@ -1,5 +1,5 @@
 import DustMotes from "./DustMotes";
-import { inkLine, type Pt } from "@/lib/ink";
+import { inkLine, type PenOpts, type Pt } from "@/lib/ink";
 import { hashString, rngFrom } from "@/lib/prng";
 import {
   type Frame,
@@ -63,16 +63,21 @@ const SEAM = 322;
 /** handles sit near the opening edge, which is the edge the doorway catches */
 const HANDLE = { x: 480, w: 14 };
 
-type Pen = {
+/**
+ * Everything `inkLine` takes except the seed, plus the two lighting knobs.
+ *
+ * Derived from `PenOpts` rather than restated: when `step` was added to the
+ * shared type, a hand-copied version of this needed the same edit or the
+ * option would have silently type-checked and done nothing here. `Omit`
+ * makes the next pen option available for free instead.
+ */
+type Pen = Omit<PenOpts, "seed"> & {
   ambient?: number;
   gain?: number;
-  amp?: number;
-  wavelength?: number;
-  overshoot?: number;
-  step?: number;
 };
 
-type Stroke = {
+/** named for what it is, so it doesn't read as the `Stroke` in `ink/Ink.tsx` */
+type LitStroke = {
   id: string;
   d: string;
   a: Pt;
@@ -80,6 +85,15 @@ type Stroke = {
   stops: { at: number; o: number }[];
   width?: number;
 };
+
+/**
+ * Generic rather than `LitStroke`-specific: the ray pass filters an array of
+ * `LitStroke & { width: number }`, and a guard narrowing to plain `LitStroke`
+ * fails `filter`'s `S extends T` constraint (the mapped `width` is required,
+ * the field on `LitStroke` optional) — so TypeScript silently drops to the
+ * non-narrowing overload and every use site stays nullable.
+ */
+const notNull = <T,>(v: T | null): v is T => v !== null;
 
 /** how many places along a stroke the beam is asked about */
 const SAMPLES = 6;
@@ -101,7 +115,7 @@ const SAMPLES = 6;
  * `<linearGradient>` — and better, because the falloff is now continuous
  * rather than stepped in twelfths.
  */
-function litStroke(f: Frame, a: Pt, b: Pt, seed: string, o: Pen = {}): Stroke | null {
+function litStroke(f: Frame, a: Pt, b: Pt, seed: string, o: Pen = {}): LitStroke | null {
   const { ambient = AMBIENT, gain = GAIN } = o;
 
   const stops: { at: number; o: number }[] = [];
@@ -120,22 +134,13 @@ function litStroke(f: Frame, a: Pt, b: Pt, seed: string, o: Pen = {}): Stroke | 
 
   return {
     id: `k${hashString(seed).toString(36)}`,
-    d: inkLine(a, b, {
-      seed,
-      amp: o.amp ?? 1.3,
-      wavelength: o.wavelength ?? 190,
-      overshoot: o.overshoot ?? 4,
-      step: o.step,
-    }),
+    // spread rather than forwarded field by field: a hand-written forward
+    // is the other place a new `PenOpts` option would go missing
+    d: inkLine(a, b, { amp: 1.3, wavelength: 190, overshoot: 4, ...o, seed }),
     a,
     b,
     stops,
   };
-}
-
-/** drop the nulls, so callers can just spread */
-function strokes(...xs: (Stroke | null)[]): Stroke[] {
-  return xs.filter((x): x is Stroke => x !== null);
 }
 
 /**
@@ -148,8 +153,8 @@ function strokes(...xs: (Stroke | null)[]): Stroke[] {
  * face, and the eye reads the falloff as a surface turning away from a
  * light. Nothing else in this file does as much for as few strokes.
  */
-function hatchDoor(y0: number, y1: number, seed: string): Stroke[] {
-  const out: Stroke[] = [];
+function hatchDoor(y0: number, y1: number, seed: string): LitStroke[] {
+  const out: LitStroke[] = [];
   const rand = rngFrom(`${seed}:hatch`);
   const spacing = 18;
   /**
@@ -164,7 +169,8 @@ function hatchDoor(y0: number, y1: number, seed: string): Stroke[] {
   const reach = 155;
   const span = y1 - y0;
 
-  for (let i = 0, x = F.x + 8; x < F.x + reach; x += spacing, i++) {
+  for (let i = 0; 8 + i * spacing < reach; i++) {
+    const x = F.x + 8 + i * spacing;
     const fade = Math.max(0, 1 - (x - F.x) / reach) ** 1.2;
 
     /**
@@ -177,25 +183,22 @@ function hatchDoor(y0: number, y1: number, seed: string): Stroke[] {
     let cursor = y0 + rand() * span * 0.1;
     for (let k = 0; k < cuts && cursor < y1; k++) {
       const len = (span / cuts) * (0.5 + rand() * 0.42);
-      out.push(
-        ...strokes(
-          litStroke(
-            WIDE,
-            { x: x + (rand() - 0.5) * 3.5, y: cursor },
-            { x: x + (rand() - 0.5) * 3.5, y: Math.min(y1, cursor + len) },
-            `${seed}:${i}:${k}`,
-            {
-              ambient: 0,
-              // fast and loose next to a deliberate edge
-              gain: 0.62 * fade,
-              amp: 1.5,
-              wavelength: 110,
-              overshoot: 5,
-              step: 22,
-            },
-          ),
-        ),
+      const s = litStroke(
+        WIDE,
+        { x: x + (rand() - 0.5) * 3.5, y: cursor },
+        { x: x + (rand() - 0.5) * 3.5, y: Math.min(y1, cursor + len) },
+        `${seed}:${i}:${k}`,
+        {
+          ambient: 0,
+          // fast and loose next to a deliberate edge
+          gain: 0.62 * fade,
+          amp: 1.5,
+          wavelength: 110,
+          overshoot: 5,
+          step: 22,
+        },
       );
+      if (s !== null) out.push(s);
       cursor += len + (span / cuts) * (0.14 + rand() * 0.26);
     }
   }
@@ -203,7 +206,7 @@ function hatchDoor(y0: number, y1: number, seed: string): Stroke[] {
 }
 
 /** every stroke the appliance is made of, in draw order. WIDE only. */
-function appliance(): Stroke[] {
+function appliance(): LitStroke[] {
   const right = F.x + F.w;
   const bottom = F.y + F.h;
   const hx = HANDLE.x;
@@ -217,7 +220,7 @@ function appliance(): Stroke[] {
     ...hatchDoor(F.y + 10, SEAM - 6, "hatch:freezer"),
     ...hatchDoor(SEAM + 16, bottom, "hatch:door"),
 
-    ...strokes(
+    ...[
       // the box. The top edge matters more than it looks: without it the
       // fridge is a pair of verticals and could be a doorway or a wall.
       w({ x: F.x, y: F.y }, { x: right, y: F.y }, "fridge:top", edge),
@@ -237,7 +240,7 @@ function appliance(): Stroke[] {
       w({ x: hr, y: 372 }, { x: hr, y: 706 }, "handle:m:b", chrome),
       w({ x: hx, y: 372 }, { x: hr, y: 372 }, "handle:m:cap", chrome),
       w({ x: hx, y: 706 }, { x: hr, y: 706 }, "handle:m:foot", chrome),
-    ),
+    ].filter(notNull),
   ];
 }
 
@@ -251,11 +254,11 @@ function appliance(): Stroke[] {
  * the whole width, it's enough: a horizontal shut line with a note taped
  * below it is legible as a fridge door in a way a lone rectangle never was.
  */
-function seamOnly(): Stroke[] {
-  return strokes(
+function seamOnly(): LitStroke[] {
+  return [
     litStroke(TALL, { x: -80, y: 330 }, { x: 880, y: 330 }, "m:seam", { step: 30 }),
     litStroke(TALL, { x: -80, y: 337 }, { x: 880, y: 337 }, "m:lip", { step: 30 }),
-  );
+  ].filter(notNull);
 }
 
 function Scene({
@@ -265,13 +268,13 @@ function Scene({
   className,
 }: {
   frame: Frame;
-  edges: Stroke[];
+  edges: LitStroke[];
   seed: string;
   className: string;
 }) {
   const specks = stipple(frame, seed);
-  const beam = strokes(
-    ...rays(frame, seed).map((r) => {
+  const beam = rays(frame, seed)
+    .map((r) => {
       const s = litStroke(frame, r.a, r.b, r.seed, {
         // no floor: a ray outside the beam is not a dim ray, it is not a
         // ray. This is what lets the fan fray out into the dark instead of
@@ -286,8 +289,8 @@ function Scene({
         step: 45,
       });
       return s === null ? null : { ...s, width: r.width };
-    }),
-  );
+    })
+    .filter(notNull);
 
   const all = [...edges, ...beam];
 
@@ -387,8 +390,8 @@ export default function Kitchen() {
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: COARSE,
-          backgroundSize: "340px 340px",
+          backgroundImage: COARSE.image,
+          backgroundSize: COARSE.size,
           opacity: 0.16,
           mixBlendMode: "screen",
         }}
@@ -396,8 +399,8 @@ export default function Kitchen() {
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: FINE,
-          backgroundSize: "200px 200px",
+          backgroundImage: FINE.image,
+          backgroundSize: FINE.size,
           opacity: 0.5,
           mixBlendMode: "screen",
         }}
@@ -422,17 +425,22 @@ export default function Kitchen() {
  * as medium speckle. The coarse pass runs two.
  */
 function turbulence(tile: number, freq: number, gamma: number, octaves: number) {
-  return (
-    `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' ` +
-    `width='${tile}' height='${tile}'%3E%3Cfilter id='g'%3E` +
-    `%3CfeTurbulence type='fractalNoise' baseFrequency='${freq}' ` +
-    `numOctaves='${octaves}' stitchTiles='stitch'/%3E` +
-    `%3CfeColorMatrix type='saturate' values='0'/%3E` +
-    `%3CfeComponentTransfer%3E%3CfeFuncA type='gamma' ` +
-    `exponent='${gamma}' amplitude='1'/%3E%3C/feComponentTransfer%3E` +
-    `%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E` +
-    `%3C/svg%3E")`
-  );
+  return {
+    image:
+      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' ` +
+      `width='${tile}' height='${tile}'%3E%3Cfilter id='g'%3E` +
+      `%3CfeTurbulence type='fractalNoise' baseFrequency='${freq}' ` +
+      `numOctaves='${octaves}' stitchTiles='stitch'/%3E` +
+      `%3CfeColorMatrix type='saturate' values='0'/%3E` +
+      `%3CfeComponentTransfer%3E%3CfeFuncA type='gamma' ` +
+      `exponent='${gamma}' amplitude='1'/%3E%3C/feComponentTransfer%3E` +
+      `%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E` +
+      `%3C/svg%3E")`,
+    /* the tile is the SVG's own width/height, so it has to be the CSS
+       background-size too or the noise stops stitching — carried along here
+       rather than restated at each use site, which is how the two drifted */
+    size: `${tile}px ${tile}px`,
+  };
 }
 
 /** dust on the lens — fine, sparse, and the layer that was always here */
