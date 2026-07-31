@@ -49,6 +49,22 @@ body {
   letter-spacing: -0.045em;
   font-weight: 900;
 }
+/*
+   One step above display, for the two or three lines on the site that are
+   an argument rather than a heading — the thesis, not a section title.
+   `t-display` tops out at 5rem, which on a wide screen leaves a statement
+   like "Make momm proud." sitting in the same band as every subhead and
+   reading as one more thing on the page instead of the point of it. This
+   is still well short of `t-mega`, which belongs to numbers.
+*/
+.t-statement {
+  /* the low end is set by the longest line it carries: at much past this,
+     "Stay off your phone." plus its doodle stops fitting one phone line and
+     the mark orphans onto a line of its own */
+  font-size: clamp(2.35rem, 1.5rem + 5vw, 6.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+}
 .t-display {
   font-size: clamp(2.6rem, 1.6rem + 4.4vw, 5rem);
   line-height: 1.02;

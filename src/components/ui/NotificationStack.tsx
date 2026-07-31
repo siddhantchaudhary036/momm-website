@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { NotificationCard } from "./cards";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { rngFrom } from "@/lib/prng";
+import { theme } from "@/theme";
 
 const MESSAGES = [
   "Are you STILL on Instagram?",
@@ -84,15 +85,18 @@ export default function NotificationStack() {
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             className="mt-1 flex items-center gap-2 rounded-full px-4 py-2.5"
             style={{
-              background: "rgba(18,14,22,0.6)",
+              background: "rgba(255,255,255,0.72)",
               backdropFilter: "blur(14px)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              WebkitBackdropFilter: "blur(14px)",
+              border: `1px solid ${theme.ink}14`,
+              boxShadow: "0 6px 18px rgba(56,46,38,0.08)",
             }}
           >
             {[0, 1, 2].map((d) => (
               <motion.span
                 key={d}
-                className="block h-1.5 w-1.5 rounded-full bg-white/60"
+                className="block h-1.5 w-1.5 rounded-full"
+                style={{ background: theme.onDoorMuted }}
                 animate={{ opacity: [0.25, 1, 0.25], y: [0, -2, 0] }}
                 transition={{
                   duration: 1.1,
@@ -102,7 +106,9 @@ export default function NotificationStack() {
                 }}
               />
             ))}
-            <span className="ml-1 text-[11px] text-white/45">momm is typing…</span>
+            <span className="ml-1 text-[11px]" style={{ color: theme.onDoorMuted }}>
+              momm is typing…
+            </span>
           </motion.div>
         )}
       </AnimatePresence>

@@ -37,8 +37,21 @@ import { theme } from "@/theme";
  * cross-fade between two creams.
  */
 
-/** how far in we end up — enough for the sheet to over-fill any viewport */
-const MAX_SCALE = 13;
+/**
+ * How far in we end up — enough for the sheet to over-fill any viewport, and
+ * deliberately not a pixel more.
+ *
+ * This was 13, which bought about ninety vertical viewports of nothing. The
+ * sheet is 480×188 on a desktop and 84vw×~134 on a phone, so it has already
+ * covered the screen at roughly ×4.8 and ×7 respectively — past that the
+ * scale keeps climbing but the picture stops changing, and the reader is
+ * scrolling a still frame of blank cream waiting for the section to end.
+ *
+ * Seven is the tall-phone number (932 ÷ 134), which is the worst case; every
+ * wider viewport fills sooner. Lower than this and a long phone would reach
+ * the hand-off with the sheet's edges still on screen.
+ */
+const MAX_SCALE = 7;
 /** where the hold ends and the push-in starts, in section progress */
 const PUSH = 0.36;
 /**
@@ -93,7 +106,20 @@ export default function Scene00Hero() {
   if (reduced) return <StaticHero />;
 
   return (
-    <section ref={ref} id={HERO_ID} className="relative h-[260vh]">
+    /*
+      170vh, down from 260.
+      Two different things were making the back of this section feel empty.
+      The zoom's own tail was one (see MAX_SCALE). The other is structural
+      and worth knowing about: with `["start start", "end end"]` the progress
+      finishes when the section's *bottom* meets the viewport bottom, i.e.
+      100vh before the section actually ends — so the last screen-height of
+      any pinned section is the sticky child scrolling away, not the
+      animation running. Here that child is a sheet of cream sliding over
+      more cream, which is invisible, so it read as dead scroll. Shortening
+      the section is half the fix; `PaperOpen` starting its own reveal during
+      that hand-off rather than waiting to pin is the other half.
+    */
+    <section ref={ref} id={HERO_ID} className="relative h-[170vh]">
       <div className="sticky top-0 h-screen overflow-hidden">
         <div className="relative flex h-full items-center justify-center px-6">
           {/* The window light, applied in viewport space rather than inside

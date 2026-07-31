@@ -96,11 +96,14 @@ export default function Icon({
   size = 20,
   className = "",
   strokeWidth = 1.6,
+  style,
 }: {
   name: IconName;
   size?: number;
   className?: string;
   strokeWidth?: number;
+  /** the icon draws in `currentColor`, so this is how a theme token reaches it */
+  style?: React.CSSProperties;
 }) {
   return (
     <svg
@@ -114,6 +117,7 @@ export default function Icon({
       strokeLinecap="round"
       strokeLinejoin="round"
       className={`shrink-0 ${className}`}
+      style={style}
     >
       {PATHS[name]}
     </svg>

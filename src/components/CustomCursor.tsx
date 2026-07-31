@@ -102,7 +102,10 @@ export default function CustomCursor() {
           marginLeft: hovering ? -26 : -15,
           marginTop: hovering ? -26 : -15,
           borderColor: hovering ? theme.text : theme.text + "88",
-          backgroundColor: hovering ? theme.text + "14" : "transparent",
+          /* `theme.text + "00"` rather than the keyword: framer can't
+             interpolate to `transparent`, and animating to it logs a warning
+             and snaps instead of fading. Same colour, as an animatable one. */
+          backgroundColor: hovering ? theme.text + "14" : theme.text + "00",
         }}
         transition={{ type: "spring", stiffness: 300, damping: 24 }}
         style={{ x: ringX, y: ringY }}

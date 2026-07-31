@@ -22,8 +22,27 @@ export const theme = {
    */
   paper: "#FBF6E9",
 
+  /**
+   * Paper pressed a shade deeper: inputs, wells, inactive tracks — the fill
+   * for anything recessed *into* a sheet rather than sitting on it.
+   *
+   * This and the two below exist in `momm-app/src/constants/theme.ts`, whose
+   * header says it was ported from this file "so the app and the marketing
+   * site are made of the same paper". The app has since grown tokens this
+   * file never had, which is how the product mockups here ended up inventing
+   * their own dark palette instead of reaching for one. Same values, same
+   * names, both directions.
+   */
+  wash: "#F1ECE0",
+
   /** dark text on paper, used where a slightly warmer black than `ink` reads better */
   onDoor: "#2B2118",
+
+  /** ink faded into the sheet — secondary text, captions, inactive values */
+  onDoorMuted: "#796686",
+
+  /** ink at 10% flattened onto paper, so a border and a ruled line are one mark */
+  border: "#E6DFD9",
 
   /** outline weight — the phone body, and anything else that needs an edge */
   stroke: 2.5,
