@@ -1,8 +1,8 @@
 "use client";
 
 import Avatar from "../Avatar";
-import Note from "../fridge/Note";
 import WordReveal from "../WordReveal";
+import ClayPanel from "../ui/ClayPanel";
 import NotificationStack from "../ui/NotificationStack";
 import { LimitsCard, StreakCard } from "../ui/cards";
 import { theme } from "@/theme";
@@ -18,8 +18,9 @@ import { theme } from "@/theme";
  * Nothing here is inside a device frame. The interface is the artwork,
  * not a picture of the artwork on a prop.
  *
- * Two planes, one rule, held all the way through: paper lies flat on the
- * door, glass floats well off it and drops a shadow back down.
+ * Her voice and her UI both sit on clay panels now; the one exception is the
+ * notification card, which stays iOS glass because that surface belongs to
+ * the operating system, not to momm.
  */
 export default function PageMeetMomm() {
   return (
@@ -34,13 +35,13 @@ export default function PageMeetMomm() {
       {/* 1 — she arrives, and keeps arriving */}
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-8 md:flex-row md:items-center md:justify-center md:gap-16">
         <div className="order-2 md:order-1 md:w-[19rem]">
-          <Note seed="she-starts" paper="lined" hand className="w-full">
-            <div className="px-6 py-5">
-              <p className="text-2xl leading-[34px] md:text-[1.7rem]">
+          <ClayPanel className="w-full">
+            <div className="px-7 py-6 font-hand" style={{ color: theme.pen }}>
+              <p className="text-2xl leading-tight md:text-[1.7rem]">
                 <WordReveal text="She notices. Immediately." />
               </p>
             </div>
-          </Note>
+          </ClayPanel>
           <Avatar
             name="momm-smirking"
             enter
@@ -57,13 +58,13 @@ export default function PageMeetMomm() {
       <div className="mx-auto mt-24 flex max-w-5xl flex-col items-center gap-10 md:mt-32 md:flex-row md:justify-center md:gap-14">
         <LimitsCard />
         <div className="flex flex-col items-center gap-6">
-          <Note seed="house-rules" paper="lined" hand className="w-[min(80vw,17rem)]">
-            <div className="px-5 py-4">
-              <p className="text-xl leading-[34px] md:text-2xl">
+          <ClayPanel className="w-[min(80vw,17rem)]">
+            <div className="px-6 py-5 font-hand" style={{ color: theme.pen }}>
+              <p className="text-xl leading-tight md:text-2xl">
                 <WordReveal text="I set your limits. And I mean it." />
               </p>
             </div>
-          </Note>
+          </ClayPanel>
           <Avatar
             name="momm-suggesting"
             enter

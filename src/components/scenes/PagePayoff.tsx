@@ -10,21 +10,16 @@ import { PEN } from "../ink/Ink";
 import LifeSheet from "../ink/LifeSheet";
 
 /**
- * PAGE 06 — the payoff, and the whole reason this conceit beat the others.
+ * PAGE 06 — the payoff.
  *
- * The fridge is where a mother displays what she's proud of. So the chart
- * stops being a chart and becomes the thing that got put up — which is
- * why this act is the one paper section with both its edges showing and
- * tape at the corners. You are looking at a sheet on a door, not at a
- * page background.
- *
- * The sheet is on its second and final appearance. It gets scratched out
- * in the reckoning and it heals here, and the healing runs the same pen
- * backwards: `stroke-dashoffset` is symmetric, so a year given back
+ * The reckoning's life-sheet returns, and it heals. The healing runs the same
+ * pen backwards: `stroke-dashoffset` is symmetric, so a year given back
  * un-scribbles itself stroke by stroke and gets ringed in green instead.
- * Watching a mark be *removed* is worth more than any recolouring could
- * be, because the loss was never a colour — it was something drawn on top
- * of you.
+ * Watching a mark be *removed* is worth more than any recolouring could be,
+ * because the loss was never a colour — it was something drawn on top of you.
+ *
+ * The chart is her navy pen on the cream page, unchanged by clay: ink is a
+ * mark, not a surface (see the ui-website steering).
  */
 export default function PagePayoff() {
   const ref = useRef<HTMLDivElement>(null);

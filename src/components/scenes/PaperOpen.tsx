@@ -17,10 +17,10 @@ import {
 } from "@/lib/ink";
 
 /**
- * The landing, immediately after the push-in — and the thesis of the site.
+ * The landing, immediately after the hero — and the thesis of the site.
  *
- * You have just travelled *through* a sheet of paper, so this needs somewhere
- * to put you down; and what it puts down is the promise the product makes.
+ * It lands straight under the hero, so it needs somewhere to put you down;
+ * and what it puts down is the promise the product makes.
  * A phone gets doodled in and struck out. "proud." gets circled the way she'd
  * circle a grade. She arrives. The last mark is an arrow into the reckoning:
  * "but she counted every one" hands straight over to the 144.
@@ -191,7 +191,7 @@ export default function PaperOpen() {
    *
    * The charts use `["start start", …]` because they have a screen to
    * themselves and nothing precedes them. This one lands directly under the
-   * hero's push-in, and a pinned section's last 100vh is always its sticky
+   * hero, and a pinned section's last 100vh is always its sticky
    * child scrolling away — cream over cream here, so with a `start start`
    * offset the reader got a screen of blank paper before the first word so
    * much as dimmed. Beginning at three-quarters up the viewport means the

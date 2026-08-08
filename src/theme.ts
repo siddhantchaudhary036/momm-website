@@ -94,6 +94,59 @@ export const theme = {
   danger: "#FF2D55", // the red that floods the life-grid
   heal: "#12B981", //   the green that gives the years back
 
+  /**
+   * CLAYMORPHISM PROTOTYPE — scoped to the "house rules" cluster on the
+   * meet-momm page, so the look can be felt before anyone commits to it.
+   *
+   * It stays inside the brand's own palette on purpose: fills are `paper`
+   * and `wash`, the shadow is the warm `#382E26` (rgba 56,46,38) this site
+   * already casts — never neutral black, which reads as dirt on cream — and
+   * the one light source is top-left, same as every other surface here. The
+   * only thing that changes is the *shape* of the surface: flat sheet with a
+   * hairline becomes an inflated, rounded blob.
+   *
+   * The recipe is the standard three-part one: a large radius, two inset
+   * shadows (light top-left, warm shade bottom-right) to fake the inflation,
+   * and a soft outer shadow to float it off the page. `pressed` inverts the
+   * insets for anything recessed *into* a surface (a slider groove, an empty
+   * day); `nub` is the tiny raised element (a slider thumb).
+   *
+   * If clay graduates from prototype to decision, this block is what moves to
+   * the shared token set the app reads too — same names, both directions.
+   */
+  clay: {
+    /** raised surface — paper, lifted so it catches the top-left light */
+    surface: "#FFFDF6",
+    /** recessed fill — paper pressed a shade deeper, for grooves and wells */
+    well: "#F1ECE0",
+    radius: 30,
+    radiusSm: 18,
+    radiusXs: 11,
+    /** puffy and floating: inset highlight, inset warm shade, soft cast */
+    raised: [
+      "inset 5px 5px 10px rgba(255,255,255,0.9)",
+      "inset -6px -7px 13px rgba(120,95,70,0.16)",
+      "0 16px 34px -10px rgba(56,46,38,0.26)",
+      "0 4px 10px rgba(56,46,38,0.10)",
+    ].join(", "),
+    /** same, dialled down for small raised beads */
+    raisedSm: [
+      "inset 2px 2px 4px rgba(255,255,255,0.85)",
+      "inset -2px -3px 5px rgba(120,95,70,0.2)",
+      "0 5px 10px -2px rgba(56,46,38,0.22)",
+    ].join(", "),
+    /** pressed into the surface — inverted insets, no cast */
+    pressed: [
+      "inset 5px 6px 11px rgba(120,95,70,0.22)",
+      "inset -4px -4px 9px rgba(255,255,255,0.85)",
+    ].join(", "),
+    /** a shallow groove — a slider track, a tiny empty cell */
+    pressedSm: [
+      "inset 2px 2px 5px rgba(120,95,70,0.24)",
+      "inset -1px -1px 3px rgba(255,255,255,0.7)",
+    ].join(", "),
+  },
+
   fonts: {
     header: "Bitter", //          typed mom-lines & headlines
     subheader: "Instrument Serif", // sign-offs & captions (italic)

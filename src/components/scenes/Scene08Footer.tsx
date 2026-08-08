@@ -17,11 +17,11 @@ import { theme } from "@/theme";
  * It's shipped as artwork rather than reset in Bitter because the logo's
  * face isn't Bitter, and a wordmark redrawn in whatever the site happens to
  * load is a wordmark you no longer own. `public/brand/wordmark.webp` has had
- * its own paper cut away by `npm run brand`, so what shows through the
- * counters is this sheet's fibre.
+ * its own background cut away by `npm run brand`, so what shows through the
+ * counters is the cream page.
  *
- * Extra headroom because this sheet is taped down: the strips hang above the
- * act's top edge, and the divider shouldn't collide with them.
+ * Comfortable headroom above the sign-off so it reads as the last line on the
+ * page rather than crowding the act above it.
  */
 export default function Scene08Footer() {
   return (

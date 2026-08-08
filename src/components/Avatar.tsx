@@ -36,8 +36,9 @@ type Props = {
  * here somewhere", a silhouette says "this person is standing there, and
  * the light is over there."
  *
- * Direction and softness are shared with Kitchen's light source. If that
- * ever moves, this has to move with it or the whole page goes uncanny.
+ * Direction and softness are shared with `PageBackground`'s light
+ * (`PAGE_LIGHT`), upper-left. If that ever moves, this has to move with it or
+ * the whole page goes uncanny.
  */
 const Avatar = forwardRef<HTMLDivElement, Props>(function Avatar(
   {

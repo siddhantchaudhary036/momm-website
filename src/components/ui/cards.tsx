@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useMemo } from "react";
-import Note from "../fridge/Note";
+import ClayPanel from "./ClayPanel";
 import Icon, { type IconName } from "./Icon";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { inkPolyline } from "@/lib/ink";
@@ -140,16 +140,22 @@ const SPRING = { type: "spring" as const, stiffness: 260, damping: 20, mass: 0.7
 /**
  * The rules sheet — the website's read of `momm-app`'s `RulesCard`.
  *
- * Each rule sits in its own `wash` well, which is the app's row treatment
- * (`rounded-2xl bg-secondary`) in the app's own recessed-surface colour. The
- * sliders stay, because a marketing page has to show what a limit *is* and
- * the app expresses that in a bottom sheet nobody can see from here.
+ * CLAYMORPHISM PROTOTYPE. The sheet is a `ClayPanel` now instead of a taped
+ * Note, and each rule sits in a *pressed* clay well (`theme.clay.pressed`)
+ * rather than a flat `wash` box — the row reads as scooped into the panel.
+ *
+ * The slider is where clay earns its keep: the track is a shallow groove
+ * (`pressedSm`), the fill is the logo's own blue→pink gradient, and the thumb
+ * is a raised clay `nub` that genuinely looks like it sits proud of the
+ * groove — depth you can't fake with a flat bar. This is what every "graph"
+ * on the site becomes under clay: the plot area is pressed *in*, the data is
+ * pushed *out*.
  */
 export function LimitsCard({ className = "" }: { className?: string }) {
   const reduced = useReducedMotion();
 
   return (
-    <Note seed="house-rules-card" paper="plain" fasten="tape" className={className}>
+    <ClayPanel className={className}>
       <div className="w-[min(88vw,22rem)] px-6 py-6">
         <p className="font-header text-lg font-bold" style={{ color: theme.ink }}>
           House rules
@@ -161,12 +167,16 @@ export function LimitsCard({ className = "" }: { className?: string }) {
           set once. momm enforces.
         </p>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3.5">
           {RULES.map((r, i) => (
             <div
               key={r.app}
-              className="rounded-2xl px-4 py-3.5"
-              style={{ background: theme.wash }}
+              className="px-4 py-3.5"
+              style={{
+                background: theme.clay.well,
+                borderRadius: theme.clay.radiusSm,
+                boxShadow: theme.clay.pressed,
+              }}
             >
               <div className="mb-2.5 flex items-center gap-2.5 text-[13px]">
                 <Icon name={r.icon} size={17} style={{ color: theme.ink }} />
@@ -185,27 +195,30 @@ export function LimitsCard({ className = "" }: { className?: string }) {
                   the thumb overshoots a touch — a limit being *set* rather
                   than a bar that was always that long */}
               <div
-                className="relative h-1.5 rounded-full"
-                style={{ background: `${theme.ink}1A` }}
+                className="relative h-2.5 rounded-full"
+                style={{
+                  background: theme.clay.well,
+                  boxShadow: theme.clay.pressedSm,
+                }}
               >
                 <motion.div
                   className="absolute inset-y-0 left-0 rounded-full"
-                  style={{ background: theme.ink }}
+                  style={{
+                    background: `linear-gradient(90deg, ${theme.gradient.from}, ${theme.gradient.to})`,
+                  }}
                   initial={reduced ? false : { width: 0 }}
                   whileInView={{ width: `${r.pct * 100}%` }}
                   viewport={{ once: true, amount: 0.6 }}
                   transition={{ ...SPRING, delay: 0.15 + i * 0.12 }}
                 />
                 <motion.div
-                  className="absolute top-1/2 h-3.5 w-3.5 rounded-full"
+                  className="absolute top-1/2 h-4 w-4 rounded-full"
                   style={{
-                    background: theme.ink,
-                    // a paper ring, so the thumb reads as sitting above the
-                    // track rather than punched out of it
-                    boxShadow: `0 0 0 2.5px ${theme.paper}, 0 2px 5px ${theme.ink}40`,
+                    background: theme.clay.surface,
+                    boxShadow: theme.clay.raisedSm,
                   }}
-                  initial={reduced ? false : { left: -7, y: "-50%" }}
-                  whileInView={{ left: `calc(${r.pct * 100}% - 7px)`, y: "-50%" }}
+                  initial={reduced ? false : { left: -8, y: "-50%" }}
+                  whileInView={{ left: `calc(${r.pct * 100}% - 8px)`, y: "-50%" }}
                   viewport={{ once: true, amount: 0.6 }}
                   transition={{ ...SPRING, delay: 0.15 + i * 0.12 }}
                 />
@@ -221,7 +234,7 @@ export function LimitsCard({ className = "" }: { className?: string }) {
           &ldquo;and I mean it.&rdquo; — momm
         </p>
       </div>
-    </Note>
+    </ClayPanel>
   );
 }
 
@@ -237,7 +250,7 @@ export function StreakCard({ className = "" }: { className?: string }) {
   );
 
   return (
-    <Note seed="streak-card" paper="plain" fasten="tape" className={className}>
+    <ClayPanel className={className}>
       <div className="w-[min(88vw,20rem)] px-6 py-6">
         <div className="flex items-center gap-2.5">
           <Icon
@@ -257,15 +270,21 @@ export function StreakCard({ className = "" }: { className?: string }) {
           make momm proud
         </p>
 
-        <div className="grid grid-cols-7 gap-1.5">
+        {/* CLAYMORPHISM PROTOTYPE. A done day is a raised clay bead pushed
+            proud of the panel; an empty day is a pressed dimple scooped into
+            it. The tick is still her ballpoint mark, drawn on top of the
+            bead — the surface changes, the pen doesn't. */}
+        <div className="grid grid-cols-7 gap-2">
           {Array.from({ length: DAYS }, (_, i) => {
             const done = i < STREAK;
             return (
               <motion.div
                 key={i}
-                className="flex aspect-square items-center justify-center rounded-md text-[10px]"
+                className="flex aspect-square items-center justify-center text-[10px]"
                 style={{
-                  background: done ? `${theme.fridge.magnet}1F` : theme.wash,
+                  background: done ? theme.clay.surface : theme.clay.well,
+                  borderRadius: theme.clay.radiusXs,
+                  boxShadow: done ? theme.clay.raisedSm : theme.clay.pressedSm,
                   color: theme.onDoorMuted,
                 }}
                 /* the streak earns itself day by day instead of arriving done */
@@ -297,6 +316,6 @@ export function StreakCard({ className = "" }: { className?: string }) {
           })}
         </div>
       </div>
-    </Note>
+    </ClayPanel>
   );
 }

@@ -3,31 +3,30 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { FormEvent, useState } from "react";
 import Avatar from "../Avatar";
-import Note from "../fridge/Note";
 import MagneticButton from "../MagneticButton";
 import WordReveal from "../WordReveal";
-import { RULE } from "../fridge/paper";
+import ClayButton from "../ui/ClayButton";
+import ClayPanel from "../ui/ClayPanel";
 import BlockedPhone from "../ui/BlockedPhone";
 import { WAITLIST_ID } from "@/lib/anchors";
 import { theme } from "@/theme";
 
 /**
- * PAGE 07 — the ask, written on her note.
+ * PAGE 07 — the ask, on her clay panel.
  *
- * The email field is a ruled line on the paper rather than a pill floating
- * over it: you're writing your address on mom's note, which is a far more
- * natural thing to be asked to do than filling in a form.
+ * The email field is a pressed clay groove scooped into the panel rather than
+ * a pill floating over it — the same raised/pressed grammar the rest of the
+ * site uses, so writing your address reads as filling in the one recessed
+ * spot on her card. Her lines stay handwritten.
  *
  * The confirmation used to read "momm's watching 🎉", which framed the
  * product as surveillance at the exact moment it needed to feel like love —
  * and surveillance is what every other app in this category already sells.
  * She hugs you instead.
  *
- * On the same paper as every other act now — `page.tsx` wraps this in
- * `PaperAct` for the fibre, the light and the taped seam, same as the
- * sections either side. `BlockedPhone` stays dark inside its own frame
- * regardless: a phone screenshot with a dark UI sitting on a light page is
- * completely ordinary, the same way it would be on paper under glass.
+ * `BlockedPhone` stays dark inside its own frame: a phone screenshot with a
+ * dark UI sitting on the cream page is completely ordinary, and `theme.night`
+ * is still allowed for a genuinely-shut device screen.
  *
  * Signups go to `/api/waitlist`, which proxies to Convex server-side.
  */
@@ -84,21 +83,13 @@ export default function Scene07Waitlist() {
         off both edges rather than give, since both items are shrink-0.
       */}
       <div className="flex flex-col items-center gap-4 lg:flex-row lg:items-end lg:gap-10">
-        <Note
-          seed="make-momm-proud"
-          paper="lined"
-          fasten="tape"
-          hand
-          enter={false}
-          /* 84vw, not 88: the tape strips hang 20px past each edge of the
-             sheet, and at 88vw they clip on the narrowest phones */
-          className="w-[min(84vw,34rem)]"
-        >
-          <div className="px-8 py-7 md:px-11 md:py-9">
-            {/* the ask is the loudest thing on the page, so it writes across
-                two rules at a time rather than one — bigger, still sitting on
-                the ruling, because 68px is 2 × RULE */}
-            <p className="text-4xl leading-[68px] md:text-5xl" style={{ color: theme.pen }}>
+        <ClayPanel className="w-[min(88vw,34rem)]">
+          <div className="px-8 py-8 md:px-11 md:py-10">
+            {/* the ask is the loudest thing on the page, in her hand */}
+            <p
+              className="font-hand text-4xl leading-tight md:text-5xl"
+              style={{ color: theme.pen }}
+            >
               <WordReveal
                 key={joined ? "joined" : "ask"}
                 text={joined ? "That's my kid." : "Ready to make momm proud?"}
@@ -111,51 +102,51 @@ export default function Scene07Waitlist() {
                   key="form"
                   onSubmit={submit}
                   exit={{ opacity: 0, y: -10 }}
-                  className="mt-5"
+                  className="mt-6"
                 >
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setErr(null);
-                    }}
-                    placeholder="your email here"
-                    aria-label="email address"
-                    aria-invalid={err !== null}
-                    className="w-full bg-transparent font-hand text-3xl outline-none placeholder:opacity-40 md:text-4xl"
+                  {/* a pressed clay groove scooped into the panel — the one
+                      recessed spot on her card, which is where you write */}
+                  <div
+                    className="px-5 py-3"
                     style={{
-                      color: err !== null ? theme.danger : theme.pen,
-                      height: RULE * 2,
-                      lineHeight: `${RULE * 2}px`,
+                      background: theme.clay.well,
+                      borderRadius: theme.clay.radiusSm,
+                      boxShadow: theme.clay.pressed,
                     }}
-                  />
+                  >
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setErr(null);
+                      }}
+                      placeholder="your email here"
+                      aria-label="email address"
+                      aria-invalid={err !== null}
+                      className="w-full bg-transparent font-hand text-3xl leading-tight outline-none placeholder:opacity-40 md:text-4xl"
+                      style={{ color: err !== null ? theme.danger : theme.pen }}
+                    />
+                  </div>
                   {err === "failed" && (
                     <p
                       role="alert"
-                      className="font-hand text-2xl"
-                      style={{ color: theme.danger, lineHeight: `${RULE}px` }}
+                      className="mt-2 font-hand text-2xl leading-tight"
+                      style={{ color: theme.danger }}
                     >
                       momm didn&apos;t catch that. try again?
                     </p>
                   )}
-                  <MagneticButton className="mt-4 inline-block">
-                    <motion.button
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.96 }}
-                      type="submit"
-                      disabled={pending}
-                      className="rounded-full px-9 py-4 font-header text-base font-bold text-white disabled:opacity-60 md:text-lg"
-                      style={{ backgroundColor: theme.ink }}
-                    >
+                  <MagneticButton className="mt-5 inline-block">
+                    <ClayButton type="submit" disabled={pending} className="px-9 py-4">
                       {pending ? "Telling momm…" : "Join the waitlist"}
-                    </motion.button>
+                    </ClayButton>
                   </MagneticButton>
                 </motion.form>
               )}
             </AnimatePresence>
           </div>
-        </Note>
+        </ClayPanel>
 
         <AnimatePresence mode="wait">
           <motion.div
